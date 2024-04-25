@@ -1,7 +1,7 @@
 # Проект «Большое путешествие»
 
 * Студент: [Анна Сахно](https://up.htmlacademy.ru/ecmascript/23/user/916231).
-* Наставник: `Неизвестно`.
+* Наставник: [Евгений Лепёшкин](https://htmlacademy.ru/profile/spearance).
 
 ---
 
