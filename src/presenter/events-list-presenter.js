@@ -13,18 +13,22 @@ const tripEventsElement = siteMainElement.querySelector('.trip-events');
 export default class eventsListPresenter {
   eventsListComponent = new EventsList();
 
-  constructor({eventsListContainer}) {
+  constructor({eventsListContainer, eventsModel}) {
     this.eventsListContainer = eventsListContainer;
+    this.eventsModel = eventsModel;
   }
 
   init() {
+    const eventList = this.eventsModel.getEvents();
+    const destinationList = this.eventsModel.getDestinations();
+    const offersList = this.eventsModel.getOffers();
     render(new Filters(), filtersWrapperElement);
     render(new Sorting(), tripEventsElement);
     render(this.eventsListComponent, this.eventsListContainer);
-    render(new EventEdit(), this.eventsListComponent.getElement());
+    render(new EventEdit({event: eventList[0], destinationList: destinationList, offersList: offersList}), this.eventsListComponent.getElement());
 
-    for (let i = 0; i < 3; i++) {
-      render(new Event(), this.eventsListComponent.getElement());
+    for (let i = 0; i < eventList.length; i++) {
+      render(new Event({event: eventList[i], destinationList: destinationList, offersList: offersList}), this.eventsListComponent.getElement());
     }
   }
 }
