@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import {convertToDayOfMonth, convertToHourMinute, getEventDuration} from '../utils.js';
 
 function createEventElement(event, destinationList, offersList) {
@@ -57,26 +57,28 @@ function createEventElement(event, destinationList, offersList) {
             </li>`;
 }
 
-export default class Event {
-  constructor({event, destinationList, offersList}) {
-    this.event = event;
-    this.destinationList = destinationList;
-    this.offersList = offersList;
+export default class Event extends AbstractView {
+  #event = null;
+  #destinationList = null;
+  #offersList = null;
+  #handleClick = null;
+
+  constructor({event, destinationList, offersList, onEditClick}) {
+    super();
+    this.#event = event;
+    this.#destinationList = destinationList;
+    this.#offersList = offersList;
+    this.#handleClick = onEditClick;
+
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
   }
 
-  getTemplate() {
-    return createEventElement(this.event, this.destinationList, this.offersList);
+  get template() {
+    return createEventElement(this.#event, this.#destinationList, this.#offersList);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleClick();
+  };
 }

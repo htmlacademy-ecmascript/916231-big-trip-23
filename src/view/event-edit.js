@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import {convertToDateTime} from '../utils.js';
 
 function createEventEditElement(event, destinationList, offersList) {
@@ -101,7 +101,10 @@ function createEventEditElement(event, destinationList, offersList) {
                   </div>
 
                   <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-                  <button class="event__reset-btn" type="reset">Cancel</button>
+                  <button class="event__reset-btn" type="reset">Delete</button>
+                  <button class="event__rollup-btn" type="button">
+                    <span class="visually-hidden">Open event</span>
+                  </button>
                 </header>
                 <section class="event__details">
                   <section class="event__section  event__section--offers">
@@ -129,26 +132,37 @@ function createEventEditElement(event, destinationList, offersList) {
             </li>`;
 }
 
-export default class EventEdit {
-  constructor({event, destinationList, offersList}) {
-    this.event = event;
-    this.destinationList = destinationList;
-    this.offersList = offersList;
+export default class EventEdit extends AbstractView {
+  #event = null;
+  #destinationList = null;
+  #offersList = null;
+  #handleSubmitClick = null;
+  #handleCancelClick = null;
+
+  constructor({event, destinationList, offersList, onSubmitClick, onCancelClick}) {
+    super();
+    this.#event = event;
+    this.#destinationList = destinationList;
+    this.#offersList = offersList;
+    this.#handleSubmitClick = onSubmitClick;
+    this.#handleCancelClick = onCancelClick;
+
+    this.element.querySelector('.event__save-btn').addEventListener('click', this.#clickSubmitHandler);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#clickCancelHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickCancelHandler);
   }
 
-  getTemplate() {
-    return createEventEditElement(this.event, this.destinationList, this.offersList);
+  get template() {
+    return createEventEditElement(this.#event, this.#destinationList, this.#offersList);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
+  #clickSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleSubmitClick();
+  };
 
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #clickCancelHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleCancelClick();
+  };
 }

@@ -1,9 +1,9 @@
-import Filters from '../view/fitlers.js';
+import Filters from '../view/filters.js';
 import Sorting from '../view/sorting.js';
 import EventsList from '../view/events-list.js';
 import EventEdit from '../view/event-edit.js';
 import Event from '../view/event.js';
-import {render} from '../render.js';
+import {render, replace} from '../framework/render.js';
 
 const siteHeaderElement = document.querySelector('.page-header');
 const siteMainElement = document.querySelector('.page-main');
@@ -11,24 +11,61 @@ const filtersWrapperElement = siteHeaderElement.querySelector('.trip-controls__f
 const tripEventsElement = siteMainElement.querySelector('.trip-events');
 
 export default class eventsListPresenter {
-  eventsListComponent = new EventsList();
+  #eventsListComponent = new EventsList();
 
-  constructor({eventsListContainer, eventsModel}) {
-    this.eventsListContainer = eventsListContainer;
-    this.eventsModel = eventsModel;
+  #eventsListContainer = null;
+  #eventList = null;
+  #destinationList = null;
+  #offersList = null;
+
+  constructor({eventsListContainer, eventsModel, destinationsModel, offersModel}) {
+    this.#eventsListContainer = eventsListContainer;
+    this.#eventList = eventsModel.getEvents();
+    this.#destinationList = destinationsModel.getDestinations();
+    this.#offersList = offersModel.getOffers();
   }
 
   init() {
-    const eventList = this.eventsModel.getEvents();
-    const destinationList = this.eventsModel.getDestinations();
-    const offersList = this.eventsModel.getOffers();
-    render(new Filters(), filtersWrapperElement);
-    render(new Sorting(), tripEventsElement);
-    render(this.eventsListComponent, this.eventsListContainer);
-    render(new EventEdit({event: eventList[0], destinationList: destinationList, offersList: offersList}), this.eventsListComponent.getElement());
+    this.#renderFilters();
+    this.#renderSorting();
+    this.#renderEventsList();
+  }
 
-    for (let i = 0; i < eventList.length; i++) {
-      render(new Event({event: eventList[i], destinationList: destinationList, offersList: offersList}), this.eventsListComponent.getElement());
+  #renderFilters() {
+    render(new Filters(), filtersWrapperElement);
+  }
+
+  #renderSorting() {
+    render(new Sorting(), tripEventsElement);
+  }
+
+  #renderEventsList() {
+    render(this.#eventsListComponent, this.#eventsListContainer);
+
+    for (let i = 0; i < this.#eventList.length; i++) {
+      this.#renderEvent(this.#eventList[i]);
     }
+  }
+
+  #renderEvent(event) {
+    const eventPoint = new Event({event: event, destinationList: this.#destinationList, offersList: this.#offersList, onEditClick: toggleEdit});
+    const eventEdit = new EventEdit({event: event, destinationList: this.#destinationList, offersList: this.#offersList, onSubmitClick: toggleView, onCancelClick: toggleView});
+
+    const onEscKeydown = (evt) => {
+      evt.preventDefault();
+      toggleView();
+    };
+
+    function toggleEdit() {
+      replace(eventEdit, eventPoint);
+      document.addEventListener('keydown', onEscKeydown);
+    }
+
+    function toggleView() {
+      replace(eventPoint, eventEdit);
+      document.removeEventListener('keydown', onEscKeydown);
+    }
+
+    render(eventPoint, this.#eventsListComponent.element);
   }
 }
