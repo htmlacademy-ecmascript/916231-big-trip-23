@@ -30,4 +30,6 @@ const getRandomArrayElement = (items) => items[Math.floor(Math.random() * items.
 
 const getRandomInteger = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 
-export {convertToDayOfMonth, convertToHourMinute, convertToDateTime, getEventDuration, getRandomArrayElement, getRandomInteger};
+const updateItem = (items, update) => items.map((item) => item.id === update.id ? update : item);
+
+export {convertToDayOfMonth, convertToHourMinute, convertToDateTime, getEventDuration, getRandomArrayElement, getRandomInteger, updateItem};

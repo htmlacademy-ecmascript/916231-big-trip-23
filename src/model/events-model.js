@@ -9,7 +9,7 @@ export default class EventsModel {
     this.#events = Array.from({length: EVENT_COUNT}, getRandomEvent);
   }
 
-  getEvents() {
+  get events() {
     return this.#events;
   }
 }
