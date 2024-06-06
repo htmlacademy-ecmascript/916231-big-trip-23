@@ -46,6 +46,6 @@ export default class Sorting extends AbstractView {
 
   #sortTypeChangeHandler = (evt) => {
     evt.preventDefault();
-    this.#handleSortTypeChange(evt.target.getAttribute("data-sort-type"));
+    this.#handleSortTypeChange(evt.target.getAttribute('data-sort-type'));
   };
 }

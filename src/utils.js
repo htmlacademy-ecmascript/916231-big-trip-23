@@ -39,7 +39,7 @@ const sortTime = (eventA, eventB) => {
   const diffB = dayjs(eventB.dateTo).diff(dayjs(eventB.dateFrom));
 
   return diffB - diffA;
-}
+};
 
 const sortPrice = (eventA, eventB) => eventB.basePrice - eventA.basePrice;
 
