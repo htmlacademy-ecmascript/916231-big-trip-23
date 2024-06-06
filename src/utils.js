@@ -32,4 +32,15 @@ const getRandomInteger = (min, max) => Math.floor(Math.random() * (max - min + 1
 
 const updateItem = (items, update) => items.map((item) => item.id === update.id ? update : item);
 
-export {convertToDayOfMonth, convertToHourMinute, convertToDateTime, getEventDuration, getRandomArrayElement, getRandomInteger, updateItem};
+const sortDay = (eventA, eventB) => dayjs(eventA.dateFrom).diff(dayjs(eventB.dateFrom));
+
+const sortTime = (eventA, eventB) => {
+  const diffA = dayjs(eventA.dateTo).diff(dayjs(eventA.dateFrom));
+  const diffB = dayjs(eventB.dateTo).diff(dayjs(eventB.dateFrom));
+
+  return diffB - diffA;
+};
+
+const sortPrice = (eventA, eventB) => eventB.basePrice - eventA.basePrice;
+
+export {convertToDayOfMonth, convertToHourMinute, convertToDateTime, getEventDuration, getRandomArrayElement, getRandomInteger, updateItem, sortDay, sortTime, sortPrice};
