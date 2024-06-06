@@ -3,7 +3,8 @@ import Sorting from '../view/sorting.js';
 import EventsList from '../view/events-list.js';
 import EventPresenter from './event-presenter.js';
 import {render} from '../framework/render.js';
-import {updateItem} from '../utils.js';
+import {updateItem, sortDay, sortTime, sortPrice} from '../utils.js';
+import {SortTypes} from '../const.js';
 
 const siteHeaderElement = document.querySelector('.page-header');
 const siteMainElement = document.querySelector('.page-main');
@@ -17,6 +18,8 @@ export default class EventsListPresenter {
   #eventList = null;
   #destinationList = null;
   #offersList = null;
+  #sortComponent = null;
+  #sourcedEvents = null;
 
   #eventPresenters = new Map();
 
@@ -30,6 +33,9 @@ export default class EventsListPresenter {
   init() {
     this.#renderFilters();
     this.#renderSorting();
+
+    this.#eventList.sort(sortDay);
+    this.#sourcedEvents = [...this.#eventList];
     this.#renderEventsList();
   }
 
@@ -38,7 +44,9 @@ export default class EventsListPresenter {
   }
 
   #renderSorting() {
-    render(new Sorting(), tripEventsElement);
+    this.#sortComponent = new Sorting({onSortTypeChange: this.#handleSortTypeChange});
+
+    render(this.#sortComponent, tripEventsElement);
   }
 
   #renderEventsList() {
@@ -70,8 +78,28 @@ export default class EventsListPresenter {
     this.#eventPresenters.forEach((presenter) => presenter.resetView());
   };
 
+  #handleSortTypeChange = (sortType) => {
+    this.#sortTasks(sortType);
+    this.#clearEventList();
+    this.#renderEventsList();
+  };
+
   #clearEventList() {
     this.#eventPresenters.forEach((eventPresenter) => eventPresenter.destroy());
     this.#eventPresenters.clear();
+  }
+
+  #sortTasks(sortType) {
+    switch (sortType) {
+      case SortTypes.DAY:
+        this.#eventList = [...this.#sourcedEvents];
+        break;
+      case SortTypes.TIME:
+        this.#eventList.sort(sortTime);
+        break;
+      case SortTypes.PRICE:
+        this.#eventList.sort(sortPrice);
+        break;
+    }
   }
 }
