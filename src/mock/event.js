@@ -1,8 +1,8 @@
+import {nanoid} from 'nanoid';
 import {getRandomArrayElement, getRandomInteger} from '../utils.js';
 
 const mockEvents = [
   {
-    id: 'f4b62099-293f-4c3d-a702-94eec4a2808c',
     basePrice: getRandomInteger(0, 1000),
     dateFrom: '2019-08-10T12:55:56.845Z',
     dateTo: '2019-08-11T11:15:13.375Z',
@@ -15,7 +15,6 @@ const mockEvents = [
     type: 'taxi',
   },
   {
-    id: 'f4b62099-293f-4c3d-a702-94eec4a2808c',
     basePrice: getRandomInteger(0, 1000),
     dateFrom: '2019-12-10T12:55:56.845Z',
     dateTo: '2019-12-10T13:22:13.375Z',
@@ -27,7 +26,6 @@ const mockEvents = [
     type: 'drive',
   },
   {
-    id: 'f4b62099-293f-4c3d-a702-94eec4a2808c',
     basePrice: getRandomInteger(0, 1000),
     dateFrom: '2019-07-10T01:55:56.845Z',
     dateTo: '2019-07-11T02:22:13.375Z',
@@ -41,6 +39,9 @@ const mockEvents = [
   },
 ];
 
-const getRandomEvent = () => getRandomArrayElement(mockEvents);
+const getRandomEvent = () => ({
+  id: nanoid(),
+  ...getRandomArrayElement(mockEvents)
+});
 
 export {getRandomEvent};

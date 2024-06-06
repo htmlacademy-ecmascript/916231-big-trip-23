@@ -1,16 +1,16 @@
 import Filters from '../view/filters.js';
 import Sorting from '../view/sorting.js';
 import EventsList from '../view/events-list.js';
-import EventEdit from '../view/event-edit.js';
-import Event from '../view/event.js';
-import {render, replace} from '../framework/render.js';
+import EventPresenter from './event-presenter.js';
+import {render} from '../framework/render.js';
+import {updateItem} from '../utils.js';
 
 const siteHeaderElement = document.querySelector('.page-header');
 const siteMainElement = document.querySelector('.page-main');
 const filtersWrapperElement = siteHeaderElement.querySelector('.trip-controls__filters');
 const tripEventsElement = siteMainElement.querySelector('.trip-events');
 
-export default class eventsListPresenter {
+export default class EventsListPresenter {
   #eventsListComponent = new EventsList();
 
   #eventsListContainer = null;
@@ -18,9 +18,11 @@ export default class eventsListPresenter {
   #destinationList = null;
   #offersList = null;
 
+  #eventPresenters = new Map();
+
   constructor({eventsListContainer, eventsModel, destinationsModel, offersModel}) {
     this.#eventsListContainer = eventsListContainer;
-    this.#eventList = eventsModel.getEvents();
+    this.#eventList = eventsModel.events;
     this.#destinationList = destinationsModel.getDestinations();
     this.#offersList = offersModel.getOffers();
   }
@@ -48,24 +50,28 @@ export default class eventsListPresenter {
   }
 
   #renderEvent(event) {
-    const eventPoint = new Event({event: event, destinationList: this.#destinationList, offersList: this.#offersList, onEditClick: toggleEdit});
-    const eventEdit = new EventEdit({event: event, destinationList: this.#destinationList, offersList: this.#offersList, onSubmitClick: toggleView, onCancelClick: toggleView});
+    const eventPresenter = new EventPresenter({
+      eventsListContainer: this.#eventsListComponent,
+      destinationsModel: this.#destinationList,
+      offersModel: this.#offersList,
+      onDataChange: this.#handleEventChange,
+      onModeChange: this.#handleModeChange
+    });
+    eventPresenter.init(event);
+    this.#eventPresenters.set(event.id, eventPresenter);
+  }
 
-    const onEscKeydown = (evt) => {
-      evt.preventDefault();
-      toggleView();
-    };
+  #handleEventChange = (updatedEvent) => {
+    this.#eventList = updateItem(this.#eventList, updatedEvent);
+    this.#eventPresenters.get(updatedEvent.id).init(updatedEvent);
+  };
 
-    function toggleEdit() {
-      replace(eventEdit, eventPoint);
-      document.addEventListener('keydown', onEscKeydown);
-    }
+  #handleModeChange = () => {
+    this.#eventPresenters.forEach((presenter) => presenter.resetView());
+  };
 
-    function toggleView() {
-      replace(eventPoint, eventEdit);
-      document.removeEventListener('keydown', onEscKeydown);
-    }
-
-    render(eventPoint, this.#eventsListComponent.element);
+  #clearEventList() {
+    this.#eventPresenters.forEach((eventPresenter) => eventPresenter.destroy());
+    this.#eventPresenters.clear();
   }
 }
