@@ -1,6 +1,9 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {convertToDateTime} from '../utils.js';
 import {EVENT_TYPES} from '../const.js';
+import flatpickr from 'flatpickr';
+
+import 'flatpickr/dist/flatpickr.min.css';
 
 function getEventTypeTitle(eventType) {
   return eventType.charAt(0).toUpperCase() + eventType.slice(1);
@@ -116,6 +119,8 @@ export default class EventEdit extends AbstractStatefulView {
   #offersList = null;
   #handleSubmitClick = null;
   #handleCancelClick = null;
+  #dateFromPicker = null;
+  #dateToPicker = null;
 
   constructor({event, destinationList, offersList, onSubmitClick, onCancelClick}) {
     super();
@@ -144,11 +149,14 @@ export default class EventEdit extends AbstractStatefulView {
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickCancelHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#changeTypeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#changeDestinationHandler);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#changePriceHandler);
+
+    this.#setDatepicker();
   }
 
   #clickSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleSubmitClick();
+    this.#handleSubmitClick(EventEdit.parseStateToEvent(this._state));
   };
 
   #clickCancelHandler = (evt) => {
@@ -172,11 +180,64 @@ export default class EventEdit extends AbstractStatefulView {
     });
   };
 
+  #dateFromChangeHandler = ([userDate]) => {
+    userDate = userDate || this._state.dateFrom;
+
+    this._setState({
+      ...this._state,
+      dateFrom: userDate,
+    });
+  };
+
+  #dateToChangeHandler = ([userDate]) => {
+    userDate = userDate || this._state.dateTo;
+
+    this._setState({
+      ...this._state,
+      dateTo: userDate,
+    });
+  };
+
+  #changePriceHandler = (evt) => {
+    const basePrice = Number(evt.target.value) || 0;
+
+    this._setState({
+      ...this._state,
+      basePrice: basePrice
+    });
+  };
+
+  #setDatepicker() {
+    this.#dateFromPicker = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        'time_24hr': true,
+        defaultDate: this._state.dateFrom,
+        maxDate: this._state.dateTo,
+        onChange: this.#dateFromChangeHandler,
+      },
+    );
+
+    this.#dateToPicker = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        'time_24hr': true,
+        defaultDate: this._state.dateTo,
+        minDate: this._state.dateFrom,
+        onChange: this.#dateToChangeHandler,
+      },
+    );
+  }
+
   static parseEventToState(event) {
     return {...event};
   }
 
-  static parseStateToTask(state) {
+  static parseStateToEvent(state) {
     return {...state};
   }
 }
