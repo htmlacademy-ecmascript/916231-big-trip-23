@@ -1,6 +1,9 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {convertToDateTime} from '../utils.js';
 import {EVENT_TYPES} from '../const.js';
+import flatpickr from 'flatpickr';
+
+import 'flatpickr/dist/flatpickr.min.css';
 
 function getEventTypeTitle(eventType) {
   return eventType.charAt(0).toUpperCase() + eventType.slice(1);
@@ -116,6 +119,8 @@ export default class EventEdit extends AbstractStatefulView {
   #offersList = null;
   #handleSubmitClick = null;
   #handleCancelClick = null;
+  #dateFromPicker = null;
+  #dateToPicker = null;
 
   constructor({event, destinationList, offersList, onSubmitClick, onCancelClick}) {
     super();
@@ -144,6 +149,8 @@ export default class EventEdit extends AbstractStatefulView {
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickCancelHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#changeTypeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#changeDestinationHandler);
+
+    this.#setDatepicker();
   }
 
   #clickSubmitHandler = (evt) => {
@@ -171,6 +178,46 @@ export default class EventEdit extends AbstractStatefulView {
       destination: newDestinationId,
     });
   };
+
+  #dateFromChangeHandler = ([userDate]) => {
+    userDate = userDate || this._state.dateFrom;
+    this.updateElement({
+      dateFrom: userDate,
+    });
+  };
+
+  #dateToChangeHandler = ([userDate]) => {
+    userDate = userDate || this._state.dateTo;
+    this.updateElement({
+      dateTo: userDate,
+    });
+  };
+
+  #setDatepicker() {
+    this.#dateFromPicker = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        'time_24hr': true,
+        defaultDate: this._state.dateFrom,
+        maxDate: this._state.dateTo,
+        onChange: this.#dateFromChangeHandler,
+      },
+    );
+
+    this.#dateToPicker = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        'time_24hr': true,
+        defaultDate: this._state.dateTo,
+        minDate: this._state.dateFrom,
+        onChange: this.#dateToChangeHandler,
+      },
+    );
+  }
 
   static parseEventToState(event) {
     return {...event};
