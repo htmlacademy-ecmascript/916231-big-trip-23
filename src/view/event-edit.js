@@ -1,11 +1,18 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {convertToDateTime} from '../utils.js';
+import {EVENT_TYPES} from '../const.js';
 
-function createEventEditElement(event, destinationList, offersList) {
-  const {basePrice, dateFrom, dateTo, type} = event;
-  const currentDestination = destinationList.find((destinationItem) => destinationItem.id === event.destination);
-  const typeOffers = offersList.find((offer) => offer.type === event.type);
-  const currentOffers = typeOffers.offers.filter((offer) => event.offers.includes(offer.id));
+function getEventTypeTitle(eventType) {
+  return eventType.charAt(0).toUpperCase() + eventType.slice(1);
+}
+
+function createEventEditElement(stateEvent, destinationList, offersList) {
+  const {basePrice, dateFrom, dateTo, destination, type} = stateEvent;
+
+  const currentDestination = destinationList.find((destinationItem) => destinationItem.id === destination);
+
+  const typeOffers = offersList.find((offer) => offer.type === type);
+  const offers = typeOffers ? typeOffers.offers : [];
 
   const startDayTime = convertToDateTime(dateFrom);
   const endDayTime = convertToDateTime(dateTo);
@@ -23,51 +30,12 @@ function createEventEditElement(event, destinationList, offersList) {
                     <div class="event__type-list">
                       <fieldset class="event__type-group">
                         <legend class="visually-hidden">Event type</legend>
-
-                        <div class="event__type-item">
-                          <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi">
-                          <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
-                        </div>
-
-                        <div class="event__type-item">
-                          <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus">
-                          <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
-                        </div>
-
-                        <div class="event__type-item">
-                          <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train">
-                          <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
-                        </div>
-
-                        <div class="event__type-item">
-                          <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship">
-                          <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
-                        </div>
-
-                        <div class="event__type-item">
-                          <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive">
-                          <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
-                        </div>
-
-                        <div class="event__type-item">
-                          <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" checked>
-                          <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
-                        </div>
-
-                        <div class="event__type-item">
-                          <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in">
-                          <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
-                        </div>
-
-                        <div class="event__type-item">
-                          <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing">
-                          <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
-                        </div>
-
-                        <div class="event__type-item">
-                          <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant">
-                          <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
-                        </div>
+                      ${EVENT_TYPES.map((eventType) => (
+    `<div class="event__type-item">
+                          <input id="event-type-${eventType}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${eventType}">
+                          <label class="event__type-label  event__type-label--${eventType}" for="event-type-${eventType}-1">${getEventTypeTitle(eventType)}</label>
+                        </div>`
+  )).join('')}
                       </fieldset>
                     </div>
                   </div>
@@ -76,10 +44,10 @@ function createEventEditElement(event, destinationList, offersList) {
                     <label class="event__label  event__type-output" for="event-destination-1">
                       ${type}
                     </label>
-                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="" list="destination-list-1">
+                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${currentDestination ? currentDestination.name : ''}" list="destination-list-1">
                     <datalist id="destination-list-1">
-                    ${destinationList.map((destination) => (
-    `<option value="${destination.name}"></option>`
+                    ${destinationList.map((eventDestination) => (
+    `<option value="${eventDestination.name}"></option>`
   )).join('')}
                     </datalist>
                   </div>
@@ -107,13 +75,14 @@ function createEventEditElement(event, destinationList, offersList) {
                   </button>
                 </header>
                 <section class="event__details">
-                  <section class="event__section  event__section--offers">
+                ${offers.length !== 0 ?
+    `<section class="event__section  event__section--offers">
                     <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
                     <div class="event__available-offers">
-                      ${currentOffers.map((offer) => (
+                      ${offers.map((offer) => (
     `<div class="event__offer-selector">
-                        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title}" type="checkbox" name="event-offer-${offer.title}" checked>
+                        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title}" type="checkbox" name="event-offer-${offer.title}">
                         <label class="event__offer-label" for="event-offer-${offer.title}">
                           <span class="event__offer-title">${offer.title}</span>
                           &plus;&euro;&nbsp;
@@ -122,18 +91,27 @@ function createEventEditElement(event, destinationList, offersList) {
                       </div>`
   )).join('')}
                     </div>
-                  </section>
-                  <section class="event__section  event__section--destination">
+                  </section>` : ''}
+                  ${currentDestination ?
+    `<section class="event__section  event__section--destination">
                     <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-                    <p class="event__destination-description">${currentDestination.description}</p>
-                  </section>
+                    ${currentDestination.description ?
+    `<p class="event__destination-description">${currentDestination.description}</p>` : ''}
+                    ${currentDestination.pictures ?
+    `<div class="event__photos-container">
+                      <div class="event__photos-tape">
+                      ${currentDestination.pictures.map((picture) => (
+    `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`
+  )).join('')}
+                      </div>
+                    </div>` : ''}
+                  </section>` : ''}
                 </section>
               </form>
             </li>`;
 }
 
-export default class EventEdit extends AbstractView {
-  #event = null;
+export default class EventEdit extends AbstractStatefulView {
   #destinationList = null;
   #offersList = null;
   #handleSubmitClick = null;
@@ -141,19 +119,31 @@ export default class EventEdit extends AbstractView {
 
   constructor({event, destinationList, offersList, onSubmitClick, onCancelClick}) {
     super();
-    this.#event = event;
     this.#destinationList = destinationList;
     this.#offersList = offersList;
     this.#handleSubmitClick = onSubmitClick;
     this.#handleCancelClick = onCancelClick;
 
-    this.element.querySelector('.event__save-btn').addEventListener('click', this.#clickSubmitHandler);
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#clickCancelHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickCancelHandler);
+    this._setState(EventEdit.parseEventToState(event));
+    this._restoreHandlers();
   }
 
   get template() {
-    return createEventEditElement(this.#event, this.#destinationList, this.#offersList);
+    return createEventEditElement(this._state, this.#destinationList, this.#offersList);
+  }
+
+  reset(event) {
+    this.updateElement(
+      EventEdit.parseEventToState(event),
+    );
+  }
+
+  _restoreHandlers() {
+    this.element.querySelector('.event__save-btn').addEventListener('click', this.#clickSubmitHandler);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#clickCancelHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickCancelHandler);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#changeTypeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#changeDestinationHandler);
   }
 
   #clickSubmitHandler = (evt) => {
@@ -165,4 +155,28 @@ export default class EventEdit extends AbstractView {
     evt.preventDefault();
     this.#handleCancelClick();
   };
+
+  #changeTypeHandler = (evt) => {
+    this.updateElement({
+      ...this._state,
+      type: evt.target.value,
+    });
+  };
+
+  #changeDestinationHandler = (evt) => {
+    const newDestination = this.#destinationList.find((destinationItem) => destinationItem.name === evt.target.value);
+    const newDestinationId = newDestination ? newDestination.id : null;
+    this.updateElement({
+      ...this._state,
+      destination: newDestinationId,
+    });
+  };
+
+  static parseEventToState(event) {
+    return {...event};
+  }
+
+  static parseStateToTask(state) {
+    return {...state};
+  }
 }

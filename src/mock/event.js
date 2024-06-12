@@ -29,7 +29,7 @@ const mockEvents = [
     basePrice: getRandomInteger(0, 1000),
     dateFrom: '2019-07-10T01:55:56.845Z',
     dateTo: '2019-07-11T02:22:13.375Z',
-    destination: 'bfa5cb75-a1fe-4b77-a83c-0e528e910e04',
+    destination: 'bfa5cb75-a1fe-4b77-a83c-0e528e910e05',
     isFavorite: false,
     offers: [
       'b4c3e4e6-9053-42ce-b747-e281314baa51',
