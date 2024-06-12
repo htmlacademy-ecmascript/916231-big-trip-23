@@ -148,7 +148,7 @@ export default class EventEdit extends AbstractStatefulView {
 
   #clickSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleSubmitClick();
+    this.#handleSubmitClick(EventEdit.parseStateToEvent(this._state));
   };
 
   #clickCancelHandler = (evt) => {
@@ -176,7 +176,7 @@ export default class EventEdit extends AbstractStatefulView {
     return {...event};
   }
 
-  static parseStateToTask(state) {
+  static parseStateToEvent(state) {
     return {...state};
   }
 }

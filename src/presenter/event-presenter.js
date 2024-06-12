@@ -99,7 +99,8 @@ export default class EventPresenter {
     this.#mode = Mode.DEFAULT;
   };
 
-  #onSubmitClick = () => {
+  #onSubmitClick = (event) => {
+    this.#handleDataChange(event);
     this.#toggleView();
   };
 

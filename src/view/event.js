@@ -5,7 +5,7 @@ function createEventElement(event, destinationList, offersList) {
   const {basePrice, dateFrom, dateTo, isFavorite, type} = event;
   const currentDestination = destinationList.find((destinationItem) => destinationItem.id === event.destination);
   const typeOffers = offersList.find((offer) => offer.type === event.type);
-  const currentOffers = typeOffers.offers.filter((offer) => event.offers.includes(offer.id));
+  const currentOffers = typeOffers ? typeOffers.offers.filter((offer) => event.offers.includes(offer.id)) : null;
 
   const startTimeDayOfMonth = convertToDayOfMonth(dateFrom);
   const startTimeHourMinute = convertToHourMinute(dateFrom);
@@ -33,7 +33,8 @@ function createEventElement(event, destinationList, offersList) {
                 <p class="event__price">
                   &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
                 </p>
-                <h4 class="visually-hidden">Offers:</h4>
+                ${currentOffers ?
+    `<h4 class="visually-hidden">Offers:</h4>
                 <ul class="event__selected-offers">
                 ${currentOffers.map((offer) => (
     `<li class="event__offer">
@@ -41,7 +42,7 @@ function createEventElement(event, destinationList, offersList) {
                     &plus;&euro;&nbsp;
                     <span class="event__offer-price">${offer.price}</span>
                   </li>`
-  )).join('')}
+  )).join('')}` : ''}
 
                 </ul>
                 <button class="event__favorite-btn ${favoriteClassName}" type="button">
