@@ -149,6 +149,7 @@ export default class EventEdit extends AbstractStatefulView {
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickCancelHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#changeTypeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#changeDestinationHandler);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#changePriceHandler);
 
     this.#setDatepicker();
   }
@@ -181,15 +182,28 @@ export default class EventEdit extends AbstractStatefulView {
 
   #dateFromChangeHandler = ([userDate]) => {
     userDate = userDate || this._state.dateFrom;
-    this.updateElement({
+
+    this._setState({
+      ...this._state,
       dateFrom: userDate,
     });
   };
 
   #dateToChangeHandler = ([userDate]) => {
     userDate = userDate || this._state.dateTo;
-    this.updateElement({
+
+    this._setState({
+      ...this._state,
       dateTo: userDate,
+    });
+  };
+
+  #changePriceHandler = (evt) => {
+    const basePrice = Number(evt.target.value) || 0;
+
+    this._setState({
+      ...this._state,
+      basePrice: basePrice
     });
   };
 
