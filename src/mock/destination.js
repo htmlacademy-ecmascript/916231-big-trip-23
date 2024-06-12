@@ -29,6 +29,17 @@ const mockDestinations = [
       description: getRandomArrayElement(DESCRIPTIONS)
     })),
   },
+  {
+    id: 'bfa5cb75-a1fe-4b77-a83c-0e528e910e05',
+    name: getRandomArrayElement(DESTINATIONS),
+    description: getRandomArrayElement(DESCRIPTIONS),
+    pictures: Array.from({
+      length: getRandomInteger(MIN_PICTURES_COUNT, MAX_PICTURES_COUNT)
+    }, () => ({
+      src: `https://loremflickr.com/248/152?random=${getRandomInteger(MIN_PICTURE_ID, MAX_PICTURE_ID)}`,
+      description: getRandomArrayElement(DESCRIPTIONS)
+    })),
+  },
 ];
 
 const getDestination = () => mockDestinations;

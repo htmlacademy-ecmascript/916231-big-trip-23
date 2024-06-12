@@ -6,7 +6,6 @@ const DATE_TIME_FORMAT = 'DD/MM/YY HH:mm';
 const NUMBER_HOURS_IN_DAY = 24;
 const NUMBER_MINUTES_IN_HOUR = 60;
 
-
 const convertToDayOfMonth = (date) => date ? dayjs(date).format(DAY_MONTH_FORMAT) : '';
 
 const convertToHourMinute = (date) => date ? dayjs(date).format(HOUR_MINUTE_FORMAT) : '';
@@ -43,4 +42,6 @@ const sortTime = (eventA, eventB) => {
 
 const sortPrice = (eventA, eventB) => eventB.basePrice - eventA.basePrice;
 
-export {convertToDayOfMonth, convertToHourMinute, convertToDateTime, getEventDuration, getRandomArrayElement, getRandomInteger, updateItem, sortDay, sortTime, sortPrice};
+const isEscapeKey = (evt) => evt.key === 'Escape';
+
+export {convertToDayOfMonth, convertToHourMinute, convertToDateTime, getEventDuration, getRandomArrayElement, getRandomInteger, updateItem, sortDay, sortTime, sortPrice, isEscapeKey};

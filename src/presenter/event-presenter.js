@@ -1,6 +1,7 @@
 import Event from '../view/event.js';
 import EventEdit from '../view/event-edit.js';
 import {render, replace, remove} from '../framework/render.js';
+import {isEscapeKey} from '../utils.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -45,8 +46,8 @@ export default class EventPresenter {
       event: this.#event,
       destinationList: this.#destinationList,
       offersList: this.#offersList,
-      onSubmitClick: this.#toggleView,
-      onCancelClick: this.#toggleView,
+      onSubmitClick: this.#onSubmitClick,
+      onCancelClick: this.#onCancelClick,
     });
 
     if(prevEventPoint === null || prevEventEdit === null) {
@@ -78,8 +79,11 @@ export default class EventPresenter {
   }
 
   #onEscKeydown = (evt) => {
-    evt.preventDefault();
-    this.#toggleView();
+    if (isEscapeKey(evt)) {
+      evt.preventDefault();
+      this.#eventEdit.reset(this.#event);
+      this.#toggleView();
+    }
   };
 
   #toggleEdit = () => {
@@ -93,6 +97,15 @@ export default class EventPresenter {
     replace(this.#eventPoint, this.#eventEdit);
     document.removeEventListener('keydown', this.#onEscKeydown);
     this.#mode = Mode.DEFAULT;
+  };
+
+  #onSubmitClick = () => {
+    this.#toggleView();
+  };
+
+  #onCancelClick = () => {
+    this.#eventEdit.reset(this.#event);
+    this.#toggleView();
   };
 
   #handleFavoriteClick = () => {
