@@ -1,6 +1,7 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import {convertToDayOfMonth, convertToHourMinute, getEventDuration} from '../utils.js';
 import {EVENT_TYPES} from '../const.js';
+import he from 'he';
 
 function createEventElement(event, destinationList, offersList) {
   const {basePrice, dateFrom, dateTo, isFavorite, type} = event;
@@ -37,7 +38,7 @@ function createEventElement(event, destinationList, offersList) {
                   <p class="event__duration">${duration}</p>
                 </div>
                 <p class="event__price">
-                  &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
+                  &euro;&nbsp;<span class="event__price-value">${he.encode(String(basePrice))}</span>
                 </p>
                 ${currentOffers ?
     `<h4 class="visually-hidden">Offers:</h4>

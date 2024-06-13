@@ -4,8 +4,8 @@ import {getRandomArrayElement, getRandomInteger} from '../utils.js';
 const mockEvents = [
   {
     basePrice: getRandomInteger(0, 1000),
-    dateFrom: '2025-08-10T12:55:56.845Z',
-    dateTo: '2025-08-11T11:15:13.375Z',
+    dateFrom: '2019-08-10T12:55:56.845Z',
+    dateTo: '2019-08-11T11:15:13.375Z',
     destination: 'cfe416cq-10xa-ye10-8077-2fs9a01edcab',
     isFavorite: true,
     offers: [
@@ -16,8 +16,8 @@ const mockEvents = [
   },
   {
     basePrice: getRandomInteger(0, 1000),
-    dateFrom: '2024-06-10T12:55:56.845Z',
-    dateTo: '2024-12-10T13:22:13.375Z',
+    dateFrom: '2019-12-10T12:55:56.845Z',
+    dateTo: '2019-12-10T13:22:13.375Z',
     destination: 'bfa5cb75-a1fe-4b77-a83c-0e528e910e04',
     isFavorite: true,
     offers: [

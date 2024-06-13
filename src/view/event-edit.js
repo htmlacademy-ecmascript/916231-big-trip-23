@@ -12,7 +12,7 @@ function getEventTypeTitle(eventType) {
 function createEventEditElement(stateEvent, destinationList, offersList) {
   const {basePrice, dateFrom, dateTo, destination, type} = stateEvent;
 
-  const price = basePrice || 0;
+  const price = basePrice;
   const currentType = type || EVENT_TYPES[0];
 
   const currentDestination = destinationList.find((destinationItem) => destinationItem.id === destination);
@@ -232,7 +232,7 @@ export default class EventEdit extends AbstractStatefulView {
 
     this._setState({
       ...this._state,
-      basePrice: basePrice
+      basePrice: String(basePrice)
     });
   };
 
