@@ -1,7 +1,8 @@
 import Event from '../view/event.js';
 import EventEdit from '../view/event-edit.js';
 import {render, replace, remove} from '../framework/render.js';
-import {isEscapeKey} from '../utils.js';
+import {isEscapeKey, isDatesEqual} from '../utils.js';
+import {UserAction, UpdateType} from '../const.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -48,6 +49,7 @@ export default class EventPresenter {
       offersList: this.#offersList,
       onSubmitClick: this.#onSubmitClick,
       onCancelClick: this.#onCancelClick,
+      onDeleteClick: this.#onDeleteClick,
     });
 
     if(prevEventPoint === null || prevEventEdit === null) {
@@ -99,8 +101,13 @@ export default class EventPresenter {
     this.#mode = Mode.DEFAULT;
   };
 
-  #onSubmitClick = (event) => {
-    this.#handleDataChange(event);
+  #onSubmitClick = (update) => {
+    const isMinorUpdate = !isDatesEqual(this.#event.dateFrom, update.dateFrom);
+    this.#handleDataChange(
+      UserAction.UPDATE_EVENT,
+      isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
+      update,
+    );
     this.#toggleView();
   };
 
@@ -109,7 +116,11 @@ export default class EventPresenter {
     this.#toggleView();
   };
 
+  #onDeleteClick = (event) => {
+    this.#handleDataChange(UserAction.DELETE_EVENT, UpdateType.MINOR, event);
+  };
+
   #handleFavoriteClick = () => {
-    this.#handleDataChange({...this.#event, isFavorite: !this.#event.isFavorite});
+    this.#handleDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, {...this.#event, isFavorite: !this.#event.isFavorite});
   };
 }

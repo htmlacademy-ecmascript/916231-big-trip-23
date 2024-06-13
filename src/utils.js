@@ -5,6 +5,7 @@ const HOUR_MINUTE_FORMAT = 'HH:mm';
 const DATE_TIME_FORMAT = 'DD/MM/YY HH:mm';
 const NUMBER_HOURS_IN_DAY = 24;
 const NUMBER_MINUTES_IN_HOUR = 60;
+const CURRENT_DATE = dayjs();
 
 const convertToDayOfMonth = (date) => date ? dayjs(date).format(DAY_MONTH_FORMAT) : '';
 
@@ -29,8 +30,6 @@ const getRandomArrayElement = (items) => items[Math.floor(Math.random() * items.
 
 const getRandomInteger = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 
-const updateItem = (items, update) => items.map((item) => item.id === update.id ? update : item);
-
 const sortDay = (eventA, eventB) => dayjs(eventA.dateFrom).diff(dayjs(eventB.dateFrom));
 
 const sortTime = (eventA, eventB) => {
@@ -42,6 +41,29 @@ const sortTime = (eventA, eventB) => {
 
 const sortPrice = (eventA, eventB) => eventB.basePrice - eventA.basePrice;
 
+const filterFuture = (events) => events.filter((event) => dayjs(event.dateFrom).diff(CURRENT_DATE) > 0);
+
+const filterPast = (events) => events.filter((event) => dayjs(CURRENT_DATE).diff(event.dateTo) > 0);
+
+const filterPresent = (events) => events.filter((event) => dayjs(CURRENT_DATE).diff(event.dateFrom) >= 0).filter((event) => dayjs(event.dateTo).diff(CURRENT_DATE) >= 0);
+
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
-export {convertToDayOfMonth, convertToHourMinute, convertToDateTime, getEventDuration, getRandomArrayElement, getRandomInteger, updateItem, sortDay, sortTime, sortPrice, isEscapeKey};
+const isDatesEqual = (dateA, dateB) => (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB, 'D');
+
+export {
+  convertToDayOfMonth,
+  convertToHourMinute,
+  filterFuture,
+  filterPresent,
+  filterPast,
+  convertToDateTime,
+  getEventDuration,
+  getRandomArrayElement,
+  getRandomInteger,
+  sortDay,
+  sortTime,
+  sortPrice,
+  isEscapeKey,
+  isDatesEqual
+};

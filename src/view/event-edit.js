@@ -12,9 +12,13 @@ function getEventTypeTitle(eventType) {
 function createEventEditElement(stateEvent, destinationList, offersList) {
   const {basePrice, dateFrom, dateTo, destination, type} = stateEvent;
 
+  const price = basePrice || 0;
+  const currentType = type || EVENT_TYPES[0];
+
   const currentDestination = destinationList.find((destinationItem) => destinationItem.id === destination);
 
   const typeOffers = offersList.find((offer) => offer.type === type);
+
   const offers = typeOffers ? typeOffers.offers : [];
 
   const startDayTime = convertToDateTime(dateFrom);
@@ -26,7 +30,7 @@ function createEventEditElement(stateEvent, destinationList, offersList) {
                   <div class="event__type-wrapper">
                     <label class="event__type  event__type-btn" for="event-type-toggle-1">
                       <span class="visually-hidden">Choose event type</span>
-                      <img class="event__type-icon" width="17" height="17" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
+                      <img class="event__type-icon" width="17" height="17" src="img/icons/${currentType.toLowerCase()}.png" alt="Event type icon">
                     </label>
                     <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
@@ -45,13 +49,13 @@ function createEventEditElement(stateEvent, destinationList, offersList) {
 
                   <div class="event__field-group  event__field-group--destination">
                     <label class="event__label  event__type-output" for="event-destination-1">
-                      ${type}
+                      ${currentType}
                     </label>
                     <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${currentDestination ? currentDestination.name : ''}" list="destination-list-1">
                     <datalist id="destination-list-1">
-                    ${destinationList.map((eventDestination) => (
+                    ${destinationList ? destinationList.map((eventDestination) => (
     `<option value="${eventDestination.name}"></option>`
-  )).join('')}
+  )).join('') : ''}
                     </datalist>
                   </div>
 
@@ -68,7 +72,7 @@ function createEventEditElement(stateEvent, destinationList, offersList) {
                       <span class="visually-hidden">Price</span>
                       &euro;
                     </label>
-                    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}">
+                    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
                   </div>
 
                   <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -119,15 +123,17 @@ export default class EventEdit extends AbstractStatefulView {
   #offersList = null;
   #handleSubmitClick = null;
   #handleCancelClick = null;
+  #handleDeleteClick = null;
   #dateFromPicker = null;
   #dateToPicker = null;
 
-  constructor({event, destinationList, offersList, onSubmitClick, onCancelClick}) {
+  constructor({event, destinationList, offersList, onSubmitClick, onCancelClick, onDeleteClick}) {
     super();
     this.#destinationList = destinationList;
     this.#offersList = offersList;
     this.#handleSubmitClick = onSubmitClick;
     this.#handleCancelClick = onCancelClick;
+    this.#handleDeleteClick = onDeleteClick;
 
     this._setState(EventEdit.parseEventToState(event));
     this._restoreHandlers();
@@ -135,6 +141,20 @@ export default class EventEdit extends AbstractStatefulView {
 
   get template() {
     return createEventEditElement(this._state, this.#destinationList, this.#offersList);
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#dateFromPicker) {
+      this.#dateFromPicker.destroy();
+      this.#dateFromPicker = null;
+    }
+
+    if (this.#dateToPicker) {
+      this.#dateToPicker.destroy();
+      this.#dateToPicker = null;
+    }
   }
 
   reset(event) {
@@ -145,7 +165,7 @@ export default class EventEdit extends AbstractStatefulView {
 
   _restoreHandlers() {
     this.element.querySelector('.event__save-btn').addEventListener('click', this.#clickSubmitHandler);
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#clickCancelHandler);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#clickDeleteHandler);
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickCancelHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#changeTypeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#changeDestinationHandler);
@@ -162,6 +182,11 @@ export default class EventEdit extends AbstractStatefulView {
   #clickCancelHandler = (evt) => {
     evt.preventDefault();
     this.#handleCancelClick();
+  };
+
+  #clickDeleteHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick(EventEdit.parseStateToEvent(this._state));
   };
 
   #changeTypeHandler = (evt) => {
@@ -187,6 +212,8 @@ export default class EventEdit extends AbstractStatefulView {
       ...this._state,
       dateFrom: userDate,
     });
+
+    this.#setDatepicker();
   };
 
   #dateToChangeHandler = ([userDate]) => {
@@ -196,6 +223,8 @@ export default class EventEdit extends AbstractStatefulView {
       ...this._state,
       dateTo: userDate,
     });
+
+    this.#setDatepicker();
   };
 
   #changePriceHandler = (evt) => {

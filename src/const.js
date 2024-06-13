@@ -13,4 +13,24 @@ const SortTypes = {
   PRICE: 'price',
   OFFER: 'offer',
 };
-export {DESTINATIONS, DESCRIPTIONS, EVENT_TYPES, SortTypes};
+
+const FilterTypes = {
+  EVERYTHING: 'everything',
+  FUTURE: 'future',
+  PRESENT: 'present',
+  PAST: 'past',
+};
+
+const UserAction = {
+  UPDATE_EVENT: 'UPDATE_EVENT',
+  ADD_EVENT: 'ADD_EVENT',
+  DELETE_EVENT: 'DELETE_EVENT',
+};
+
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+};
+
+export {DESTINATIONS, DESCRIPTIONS, EVENT_TYPES, SortTypes, FilterTypes, UserAction, UpdateType};

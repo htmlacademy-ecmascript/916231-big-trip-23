@@ -1,10 +1,16 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import {convertToDayOfMonth, convertToHourMinute, getEventDuration} from '../utils.js';
+import {EVENT_TYPES} from '../const.js';
 
 function createEventElement(event, destinationList, offersList) {
   const {basePrice, dateFrom, dateTo, isFavorite, type} = event;
+
+  const currentType = type || EVENT_TYPES[0];
+
   const currentDestination = destinationList.find((destinationItem) => destinationItem.id === event.destination);
+
   const typeOffers = offersList.find((offer) => offer.type === event.type);
+
   const currentOffers = typeOffers ? typeOffers.offers.filter((offer) => event.offers.includes(offer.id)) : null;
 
   const startTimeDayOfMonth = convertToDayOfMonth(dateFrom);
@@ -19,9 +25,9 @@ function createEventElement(event, destinationList, offersList) {
               <div class="event">
                 <time class="event__date" datetime="${dateFrom}">${startTimeDayOfMonth}</time>
                 <div class="event__type">
-                  <img class="event__type-icon" width="42" height="42" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
+                  <img class="event__type-icon" width="42" height="42" src="img/icons/${currentType.toLowerCase()}.png" alt="Event type icon">
                 </div>
-                <h3 class="event__title">${type} ${currentDestination.name}</h3>
+                <h3 class="event__title">${currentType} ${currentDestination.name}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
                     <time class="event__start-time" datetime="${dateFrom}">${startTimeHourMinute}</time>
