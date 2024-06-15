@@ -6,6 +6,10 @@ import OffersModel from './model/offers-model.js';
 import FilterModel from './model/filter-model.js';
 import NewEventButtonView from './view/new-event-button-view.js';
 import {render} from './framework/render.js';
+import EventsApiService from './events-api-service.js';
+
+const AUTHORIZATION = 'Basic fghhtgrfdsx';
+const END_POINT = 'https://23.objects.htmlacademy.pro/big-trip';
 
 const siteMainElement = document.querySelector('.page-main');
 const tripEventsElement = siteMainElement.querySelector('.trip-events');
@@ -13,9 +17,18 @@ const siteHeaderElement = document.querySelector('.page-header');
 const buttonNewWrapperElement = siteHeaderElement.querySelector('.trip-main');
 const filtersWrapperElement = siteHeaderElement.querySelector('.trip-controls__filters');
 
-const eventsModel = new EventsModel();
-const destinationsModel = new DestinationModel();
-const offersModel = new OffersModel();
+const eventsModel = new EventsModel({
+  eventsApiService: new EventsApiService(END_POINT, AUTHORIZATION)
+});
+
+const destinationsModel = new DestinationModel({
+  eventsApiService: new EventsApiService(END_POINT, AUTHORIZATION)
+});
+
+const offersModel = new OffersModel({
+  eventsApiService: new EventsApiService(END_POINT, AUTHORIZATION)
+});
+
 const filterModel = new FilterModel();
 const eventsListPresenter = new EventsListPresenter({
   eventsListContainer: tripEventsElement,
@@ -45,9 +58,14 @@ function handleNewEventButtonClick() {
   newEventButtonComponent.element.disabled = true;
 }
 
-render(newEventButtonComponent, buttonNewWrapperElement);
-
 filterPresenter.init();
 eventsListPresenter.init();
-
+destinationsModel.init().finally(() => {
+  offersModel.init().finally(() => {
+    eventsModel.init()
+      .finally(() => {
+        render(newEventButtonComponent, buttonNewWrapperElement);
+      });
+  });
+});
 

@@ -1,35 +1,51 @@
 import Observable from '../framework/observable.js';
-import {getRandomEvent} from '../mock/event.js';
-
-const EVENT_COUNT = 3;
+import {UpdateType} from '../const.js';
 
 export default class EventsModel extends Observable {
-  #events = null;
+  #events = [];
+  #eventsApiService = null;
 
-  constructor() {
+  constructor({eventsApiService}) {
     super();
-
-    this.#events = Array.from({length: EVENT_COUNT}, getRandomEvent);
+    this.#eventsApiService = eventsApiService;
   }
 
   get events() {
     return this.#events;
   }
 
-  updateEvent(updateType, update) {
+  async init() {
+    try {
+      const events = await this.#eventsApiService.events;
+      this.#events = events.map(this.#adaptToClient);
+    } catch(err) {
+      this.#events = [];
+    }
+
+    this._notify(UpdateType.INIT);
+  }
+
+  async updateEvent(updateType, update) {
     const index = this.#events.findIndex((event) => event.id === update.id);
 
     if (index === -1) {
       throw new Error('Can\'t update unexisting event');
     }
 
-    this.#events = [
-      ...this.#events.slice(0, index),
-      update,
-      ...this.#events.slice(index + 1),
-    ];
+    try {
+      const response = await this.#eventsApiService.updateEvent(update);
+      const updatedEvent = this.#adaptToClient(response);
 
-    this._notify(updateType, update);
+      this.#events = [
+        ...this.#events.slice(0, index),
+        updatedEvent,
+        ...this.#events.slice(index + 1),
+      ];
+
+      this._notify(updateType, updatedEvent);
+    } catch(err) {
+      throw new Error('Can\'t update event');
+    }
   }
 
   addEvent(updateType, update) {
@@ -54,5 +70,21 @@ export default class EventsModel extends Observable {
     ];
 
     this._notify(updateType);
+  }
+
+  #adaptToClient(event) {
+    const adaptedEvent = {...event,
+      basePrice: event['base_price'],
+      dateFrom: event['date_from'],
+      dateTo: event['date_to'],
+      isFavorite: event['is_favorite'],
+    };
+
+    delete adaptedEvent['base_price'];
+    delete adaptedEvent['date_from'];
+    delete adaptedEvent['date_to'];
+    delete adaptedEvent['is_favorite'];
+
+    return adaptedEvent;
   }
 }

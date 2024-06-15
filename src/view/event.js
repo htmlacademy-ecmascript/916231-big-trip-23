@@ -28,7 +28,7 @@ function createEventElement(event, destinationList, offersList) {
                 <div class="event__type">
                   <img class="event__type-icon" width="42" height="42" src="img/icons/${currentType.toLowerCase()}.png" alt="Event type icon">
                 </div>
-                <h3 class="event__title">${currentType} ${currentDestination.name}</h3>
+                <h3 class="event__title">${currentType} ${currentDestination ? currentDestination.name : ''}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
                     <time class="event__start-time" datetime="${dateFrom}">${startTimeHourMinute}</time>
@@ -76,8 +76,8 @@ export default class Event extends AbstractView {
   constructor({event, destinationList, offersList, onEditClick, onFavoriteClick}) {
     super();
     this.#event = event;
-    this.#destinationList = destinationList;
-    this.#offersList = offersList;
+    this.#destinationList = destinationList.destinations;
+    this.#offersList = offersList.offers;
     this.#handleClick = onEditClick;
     this.#handleFavoriteClick = onFavoriteClick;
 

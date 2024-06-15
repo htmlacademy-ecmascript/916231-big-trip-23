@@ -1,6 +1,7 @@
 import Sorting from '../view/sorting.js';
 import EventsList from '../view/events-list.js';
 import NoEvent from '../view/no-event.js';
+import Loading from '../view/loading.js';
 import EventPresenter from './event-presenter.js';
 import NewEventPresenter from './new-event-presenter.js';
 import {render, remove} from '../framework/render.js';
@@ -15,11 +16,12 @@ export default class EventsListPresenter {
 
   #eventsListContainer = null;
   #eventsModel = null;
-  #destinationList = null;
+  #destinationsModel = null;
   #offersList = null;
   #filterModel = null;
   #sortComponent = null;
   #noEventComponent = null;
+  #loadingComponent = new Loading();
 
   #currentSortType = SortTypes.DAY;
   #currentFilterType = FilterTypes.EVERYTHING;
@@ -27,11 +29,13 @@ export default class EventsListPresenter {
   #eventPresenters = new Map();
   #newEventPresenter = null;
 
+  #isLoading = true;
+
   constructor({eventsListContainer, eventsModel, destinationsModel, offersModel, filterModel, onNewEventDestroy}) {
     this.#eventsListContainer = eventsListContainer;
     this.#eventsModel = eventsModel;
-    this.#destinationList = destinationsModel.getDestinations();
-    this.#offersList = offersModel.getOffers();
+    this.#destinationsModel = destinationsModel;
+    this.#offersList = offersModel;
     this.#filterModel = filterModel;
 
     this.#eventsModel.addObserver(this.#handleModelEvent);
@@ -40,7 +44,7 @@ export default class EventsListPresenter {
     this.#newEventPresenter = new NewEventPresenter({
       eventListContainer: this.#eventsListComponent.element,
       event: this.#eventsModel.events,
-      destinationList: this.#destinationList,
+      destinationList: this.#destinationsModel,
       offersList: this.#offersList,
       onSubmitClick: this.#handleViewAction,
       onDestroy: onNewEventDestroy
@@ -48,8 +52,6 @@ export default class EventsListPresenter {
   }
 
   init() {
-    this.#renderSorting();
-
     this.#renderEventsList();
   }
 
@@ -61,6 +63,7 @@ export default class EventsListPresenter {
 
   get events() {
     this.#currentFilterType = this.#filterModel.filter;
+
     const events = this.#eventsModel.events;
 
     let filteredEvents;
@@ -92,58 +95,6 @@ export default class EventsListPresenter {
     return filteredEvents;
   }
 
-  #renderSorting() {
-    this.#sortComponent = new Sorting({onSortTypeChange: this.#handleSortTypeChange});
-
-    render(this.#sortComponent, tripEventsElement);
-  }
-
-  #renderEventsList() {
-    const eventList = this.events;
-
-    if(eventList.length === 0) {
-      this.#renderNoEvent();
-      return;
-    }
-
-    render(this.#eventsListComponent, this.#eventsListContainer);
-
-    for (let i = 0; i < eventList.length; i++) {
-      this.#renderEvent(eventList[i]);
-    }
-  }
-
-  #renderEvent(event) {
-    const eventPresenter = new EventPresenter({
-      eventsListContainer: this.#eventsListComponent,
-      destinationsModel: this.#destinationList,
-      offersModel: this.#offersList,
-      onDataChange: this.#handleViewAction,
-      onModeChange: this.#handleModeChange
-    });
-    eventPresenter.init(event);
-    this.#eventPresenters.set(event.id, eventPresenter);
-  }
-
-  #renderNoEvent() {
-    this.#noEventComponent = new NoEvent({
-      filterType: this.#currentFilterType
-    });
-
-    render(this.#noEventComponent, this.#eventsListContainer);
-  }
-
-  #clearEventList(resetSortType = false) {
-    this.#newEventPresenter.destroy();
-    this.#eventPresenters.forEach((eventPresenter) => eventPresenter.destroy());
-    this.#eventPresenters.clear();
-    if (resetSortType) {
-      this.#currentSortType = SortTypes.DAY;
-    }
-    this.#currentFilterType = FilterTypes.EVERYTHING;
-    remove(this.#noEventComponent);
-  }
-
   #handleViewAction = (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_EVENT:
@@ -171,6 +122,12 @@ export default class EventsListPresenter {
         this.#clearEventList({resetSortType: true});
         this.#renderEventsList();
         break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#clearEventList();
+        this.#renderEventsList();
+        break;
     }
   };
 
@@ -184,4 +141,69 @@ export default class EventsListPresenter {
     this.#clearEventList();
     this.#renderEventsList();
   };
+
+  #renderSorting() {
+    this.#sortComponent = new Sorting({onSortTypeChange: this.#handleSortTypeChange});
+
+    render(this.#sortComponent, tripEventsElement);
+  }
+
+  #renderEventsList() {
+    const eventList = this.events;
+
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
+
+    if(eventList.length === 0) {
+      this.#renderNoEvent();
+      return;
+    }
+
+    this.#renderSorting();
+
+    render(this.#eventsListComponent, this.#eventsListContainer);
+
+    for (let i = 0; i < eventList.length; i++) {
+      this.#renderEvent(eventList[i]);
+    }
+  }
+
+  #renderEvent(event) {
+    const eventPresenter = new EventPresenter({
+      eventsListContainer: this.#eventsListComponent,
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersList,
+      onDataChange: this.#handleViewAction,
+      onModeChange: this.#handleModeChange
+    });
+    eventPresenter.init(event);
+    this.#eventPresenters.set(event.id, eventPresenter);
+  }
+
+  #renderNoEvent() {
+    this.#noEventComponent = new NoEvent({
+      filterType: this.#currentFilterType
+    });
+
+    render(this.#noEventComponent, this.#eventsListContainer);
+  }
+
+  #renderLoading() {
+    render(this.#loadingComponent, this.#eventsListContainer);
+  }
+
+  #clearEventList(resetSortType = false) {
+    this.#newEventPresenter.destroy();
+    this.#eventPresenters.forEach((eventPresenter) => eventPresenter.destroy());
+    this.#eventPresenters.clear();
+    if (resetSortType) {
+      this.#currentSortType = SortTypes.DAY;
+    }
+    this.#currentFilterType = FilterTypes.EVERYTHING;
+    remove(this.#sortComponent);
+    remove(this.#noEventComponent);
+    remove(this.#loadingComponent);
+  }
 }

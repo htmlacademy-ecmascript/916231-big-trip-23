@@ -165,8 +165,8 @@ export default class EventEdit extends AbstractStatefulView {
 
   constructor({event = DEFAULT_EVENT, destinationList, offersList, onSubmitClick, onCancelClick, onDeleteClick}) {
     super();
-    this.#destinationList = destinationList;
-    this.#offersList = offersList;
+    this.#destinationList = destinationList.destinations;
+    this.#offersList = offersList.offers;
     this.#handleSubmitClick = onSubmitClick;
     this.#handleCancelClick = onCancelClick;
     this.#handleDeleteClick = onDeleteClick;
@@ -207,8 +207,11 @@ export default class EventEdit extends AbstractStatefulView {
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickCancelHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#changeTypeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#changeDestinationHandler);
-    this.element.querySelector('.event__available-offers').addEventListener('change', this.#changeOfferHandler);
     this.element.querySelector('.event__input--price').addEventListener('change', this.#changePriceHandler);
+
+    if(this._state.event?.offers) {
+      this.element.querySelector('.event__available-offers').addEventListener('change', this.#changeOfferHandler);
+    }
 
     this.#setDatepicker();
   }
