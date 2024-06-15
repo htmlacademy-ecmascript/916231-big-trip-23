@@ -1,10 +1,17 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import {convertToDayOfMonth, convertToHourMinute, getEventDuration} from '../utils.js';
+import {EVENT_TYPES} from '../const.js';
+import he from 'he';
 
 function createEventElement(event, destinationList, offersList) {
   const {basePrice, dateFrom, dateTo, isFavorite, type} = event;
+
+  const currentType = type || EVENT_TYPES[0];
+
   const currentDestination = destinationList.find((destinationItem) => destinationItem.id === event.destination);
+
   const typeOffers = offersList.find((offer) => offer.type === event.type);
+
   const currentOffers = typeOffers ? typeOffers.offers.filter((offer) => event.offers.includes(offer.id)) : null;
 
   const startTimeDayOfMonth = convertToDayOfMonth(dateFrom);
@@ -19,9 +26,9 @@ function createEventElement(event, destinationList, offersList) {
               <div class="event">
                 <time class="event__date" datetime="${dateFrom}">${startTimeDayOfMonth}</time>
                 <div class="event__type">
-                  <img class="event__type-icon" width="42" height="42" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
+                  <img class="event__type-icon" width="42" height="42" src="img/icons/${currentType.toLowerCase()}.png" alt="Event type icon">
                 </div>
-                <h3 class="event__title">${type} ${currentDestination.name}</h3>
+                <h3 class="event__title">${currentType} ${currentDestination.name}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
                     <time class="event__start-time" datetime="${dateFrom}">${startTimeHourMinute}</time>
@@ -31,20 +38,21 @@ function createEventElement(event, destinationList, offersList) {
                   <p class="event__duration">${duration}</p>
                 </div>
                 <p class="event__price">
-                  &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
+                  &euro;&nbsp;<span class="event__price-value">${he.encode(String(basePrice))}</span>
                 </p>
-                ${currentOffers ?
-    `<h4 class="visually-hidden">Offers:</h4>
+
+                ${currentOffers ? `
+                <h4 class="visually-hidden">Offers:</h4>
                 <ul class="event__selected-offers">
-                ${currentOffers.map((offer) => (
-    `<li class="event__offer">
+                ${currentOffers.map((offer) => (`
+                  <li class="event__offer">
                     <span class="event__offer-title">${offer.title}</span>
                     &plus;&euro;&nbsp;
                     <span class="event__offer-price">${offer.price}</span>
-                  </li>`
-  )).join('')}` : ''}
-
+                  </li>
+                `)).join('')}` : ''}
                 </ul>
+
                 <button class="event__favorite-btn ${favoriteClassName}" type="button">
                   <span class="visually-hidden">Add to favorite</span>
                   <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
@@ -73,7 +81,7 @@ export default class Event extends AbstractView {
     this.#handleClick = onEditClick;
     this.#handleFavoriteClick = onFavoriteClick;
 
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickRollupHandler);
     this.element.querySelector('.event__favorite-btn').addEventListener('click', this.#favoriteClickHandler);
   }
 
@@ -81,7 +89,7 @@ export default class Event extends AbstractView {
     return createEventElement(this.#event, this.#destinationList, this.#offersList);
   }
 
-  #clickHandler = (evt) => {
+  #clickRollupHandler = (evt) => {
     evt.preventDefault();
     this.#handleClick();
   };
