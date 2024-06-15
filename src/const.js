@@ -14,6 +14,7 @@ const DEFAULT_EVENT = {
   dateTo: getDefaultDateTo(),
   destination: '',
   offers: [],
+  isFavorite: false,
   type: EVENT_TYPES[0],
 };
 

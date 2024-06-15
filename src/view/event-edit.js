@@ -136,7 +136,7 @@ function createEventEditElement(state, destinationList, offersList) {
                     <span class="visually-hidden">Price</span>
                     &euro;
                   </label>
-                  <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
+                  <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}" pattern="^\\d+$">
                 </div>
 
                 <button class="event__save-btn  btn  btn--blue" type="submit" ${isValidForm ? '' : 'disabled'}>Save</button>
@@ -278,11 +278,11 @@ export default class EventEdit extends AbstractStatefulView {
   };
 
   #changePriceHandler = (evt) => {
-    const basePrice = Number(evt.target.value) || 0;
+    const basePrice = evt.target.value;
 
     this._setState({
       ...this._state,
-      basePrice: String(basePrice)
+      basePrice: Number(basePrice)
     });
   };
 

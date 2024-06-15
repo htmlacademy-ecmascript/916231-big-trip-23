@@ -57,7 +57,7 @@ export default class NewEventPresenter {
     this.#onSubmitClick(
       UserAction.ADD_EVENT,
       UpdateType.MINOR,
-      {id: nanoid(), ...event},
+      event,
     );
     this.destroy();
   };
