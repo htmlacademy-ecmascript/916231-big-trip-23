@@ -1,3 +1,5 @@
+import {getDefaultDateFrom, getDefaultDateTo} from './utils.js';
+
 const DESTINATIONS = ['Amsterdam', 'Chamonix', 'Geneva', 'Test1', 'Test2'];
 
 const DESCRIPTIONS = ['Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
@@ -5,6 +7,15 @@ const DESCRIPTIONS = ['Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
   'Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum.'];
 
 const EVENT_TYPES = ['taxi', 'bus', 'train','ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
+
+const DEFAULT_EVENT = {
+  basePrice: 0,
+  dateFrom: getDefaultDateFrom(),
+  dateTo: getDefaultDateTo(),
+  destination: '',
+  offers: [],
+  type: EVENT_TYPES[0],
+};
 
 const SortTypes = {
   DAY: 'day',
@@ -33,4 +44,4 @@ const UpdateType = {
   MAJOR: 'MAJOR',
 };
 
-export {DESTINATIONS, DESCRIPTIONS, EVENT_TYPES, SortTypes, FilterTypes, UserAction, UpdateType};
+export {DESTINATIONS, DESCRIPTIONS, EVENT_TYPES, DEFAULT_EVENT, SortTypes, FilterTypes, UserAction, UpdateType};

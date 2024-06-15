@@ -28,7 +28,6 @@ export default class NewEventPresenter {
     }
 
     this.#eventEditComponent = new EventEdit({
-      event: this.#event,
       destinationList: this.#destinationList,
       offersList: this.#offersList,
       onSubmitClick: this.#handleFormSubmit,

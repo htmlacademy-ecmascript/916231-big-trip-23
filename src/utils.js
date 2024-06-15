@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { FilterTypes } from './const.js';
 
 const DAY_MONTH_FORMAT = 'MMM D';
 const HOUR_MINUTE_FORMAT = 'HH:mm';
@@ -47,6 +48,23 @@ const filterPast = (events) => events.filter((event) => dayjs(CURRENT_DATE).diff
 
 const filterPresent = (events) => events.filter((event) => dayjs(CURRENT_DATE).diff(event.dateFrom) >= 0).filter((event) => dayjs(event.dateTo).diff(CURRENT_DATE) >= 0);
 
+const getEventFilterCount = (events, filterType) => {
+  switch (filterType) {
+    case FilterTypes.EVERYTHING:
+      return events.length;
+    case FilterTypes.FUTURE:
+      return filterFuture(events).length;
+    case FilterTypes.PRESENT:
+      return filterPresent(events).length;
+    case FilterTypes.PAST:
+      return filterPast(events).length;
+  }
+};
+
+const getDefaultDateFrom = () => new Date(CURRENT_DATE);
+
+const getDefaultDateTo = () => new Date(CURRENT_DATE.add(1, 'day'));
+
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
 const isDatesEqual = (dateA, dateB) => (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB, 'D');
@@ -57,6 +75,7 @@ export {
   filterFuture,
   filterPresent,
   filterPast,
+  getEventFilterCount,
   convertToDateTime,
   getEventDuration,
   getRandomArrayElement,
@@ -64,6 +83,8 @@ export {
   sortDay,
   sortTime,
   sortPrice,
+  getDefaultDateFrom,
+  getDefaultDateTo,
   isEscapeKey,
   isDatesEqual
 };

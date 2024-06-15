@@ -40,18 +40,19 @@ function createEventElement(event, destinationList, offersList) {
                 <p class="event__price">
                   &euro;&nbsp;<span class="event__price-value">${he.encode(String(basePrice))}</span>
                 </p>
-                ${currentOffers ?
-    `<h4 class="visually-hidden">Offers:</h4>
+
+                ${currentOffers ? `
+                <h4 class="visually-hidden">Offers:</h4>
                 <ul class="event__selected-offers">
-                ${currentOffers.map((offer) => (
-    `<li class="event__offer">
+                ${currentOffers.map((offer) => (`
+                  <li class="event__offer">
                     <span class="event__offer-title">${offer.title}</span>
                     &plus;&euro;&nbsp;
                     <span class="event__offer-price">${offer.price}</span>
-                  </li>`
-  )).join('')}` : ''}
-
+                  </li>
+                `)).join('')}` : ''}
                 </ul>
+
                 <button class="event__favorite-btn ${favoriteClassName}" type="button">
                   <span class="visually-hidden">Add to favorite</span>
                   <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
@@ -80,7 +81,7 @@ export default class Event extends AbstractView {
     this.#handleClick = onEditClick;
     this.#handleFavoriteClick = onFavoriteClick;
 
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickRollupHandler);
     this.element.querySelector('.event__favorite-btn').addEventListener('click', this.#favoriteClickHandler);
   }
 
@@ -88,7 +89,7 @@ export default class Event extends AbstractView {
     return createEventElement(this.#event, this.#destinationList, this.#offersList);
   }
 
-  #clickHandler = (evt) => {
+  #clickRollupHandler = (evt) => {
     evt.preventDefault();
     this.#handleClick();
   };

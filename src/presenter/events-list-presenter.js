@@ -22,7 +22,7 @@ export default class EventsListPresenter {
   #noEventComponent = null;
 
   #currentSortType = SortTypes.DAY;
-  #currentFilterType = FilterTypes.PAST;
+  #currentFilterType = FilterTypes.EVERYTHING;
 
   #eventPresenters = new Map();
   #newEventPresenter = null;
@@ -140,6 +140,7 @@ export default class EventsListPresenter {
     if (resetSortType) {
       this.#currentSortType = SortTypes.DAY;
     }
+    this.#currentFilterType = FilterTypes.EVERYTHING;
     remove(this.#noEventComponent);
   }
 
