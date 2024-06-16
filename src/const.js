@@ -1,20 +1,13 @@
-import {getDefaultDateFrom, getDefaultDateTo} from './utils.js';
-
-const DESTINATIONS = ['Amsterdam', 'Chamonix', 'Geneva', 'Test1', 'Test2'];
-
-const DESCRIPTIONS = ['Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-  'Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetr',
-  'Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum.'];
-
 const EVENT_TYPES = ['taxi', 'bus', 'train','ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 
 const DEFAULT_EVENT = {
   basePrice: 0,
-  dateFrom: getDefaultDateFrom(),
-  dateTo: getDefaultDateTo(),
+  dateFrom: '',
+  dateTo: '',
   destination: '',
   offers: [],
-  type: EVENT_TYPES[0],
+  isFavorite: false,
+  type: 'flight',
 };
 
 const SortTypes = {
@@ -45,4 +38,17 @@ const UpdateType = {
   INIT: 'INIT',
 };
 
-export {DESTINATIONS, DESCRIPTIONS, EVENT_TYPES, DEFAULT_EVENT, SortTypes, FilterTypes, UserAction, UpdateType};
+const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};
+
+export {
+  EVENT_TYPES,
+  DEFAULT_EVENT,
+  SortTypes,
+  FilterTypes,
+  UserAction,
+  UpdateType,
+  TimeLimit
+};

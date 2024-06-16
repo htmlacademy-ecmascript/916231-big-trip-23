@@ -10,7 +10,7 @@ function getEventTypeTitle(eventType) {
 }
 
 function createDestinationTemplate(destination) {
-  return `${destination ?
+  return `${destination?.description || destination?.pictures.length ?
     `<section class="event__section  event__section--destination">
       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
       ${destination.description ? `
@@ -26,7 +26,7 @@ function createDestinationTemplate(destination) {
     </section>` : ''}`;
 }
 
-function createOffersTemplate(currentOffers, checkedOffers) {
+function createOffersTemplate(currentOffers, checkedOffers, isDisabled) {
   return `${currentOffers.length ?
     `<section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -41,6 +41,7 @@ function createOffersTemplate(currentOffers, checkedOffers) {
             name="event-offer-${offer.title}"
             ${checkedOffers?.includes(offer.id) ? 'checked' : ''}
             data-offer-id="${offer.id}"
+            ${isDisabled ? 'disabled' : ''}
           >
           <label class="event__offer-label" for="event-offer-${offer.title}">
             <span class="event__offer-title">${offer.title}</span>
@@ -53,8 +54,18 @@ function createOffersTemplate(currentOffers, checkedOffers) {
     </section>` : ''}`;
 }
 
-function createEventEditElement(state, destinationList, offersList) {
-  const {basePrice, dateFrom, dateTo, destination, offers, type, isValidForm} = state;
+function createEventEditElement(state, destinationList, offersList, isNewEvent, isSubmitDisabled) {
+  const {
+    basePrice,
+    dateFrom,
+    dateTo,
+    destination,
+    offers,
+    type,
+    isDisabled,
+    isSaving,
+    isDeleting
+  } = state;
 
   const price = basePrice || 0;
   const currentType = type;
@@ -91,6 +102,7 @@ function createEventEditElement(state, destinationList, offersList) {
                           name="event-type"
                           value="${eventType}"
                           ${eventType === currentType ? 'checked' : ''}
+                          ${isDisabled ? 'disabled' : ''}
                         >
                         <label class="event__type-label event__type-label--${eventType}" for="event-type-${eventType}-1">
                           ${getEventTypeTitle(eventType)}
@@ -113,7 +125,7 @@ function createEventEditElement(state, destinationList, offersList) {
                     name="event-destination"
                     value="${currentDestination ? currentDestination.name : ''}"
                     list="destination-list-1"
-                    required
+                    ${isDisabled ? 'disabled' : ''}
                   >
                   ${destinationList ? `
                   <datalist id="destination-list-1">
@@ -125,10 +137,10 @@ function createEventEditElement(state, destinationList, offersList) {
 
                 <div class="event__field-group  event__field-group--time">
                   <label class="visually-hidden" for="event-start-time-1">From</label>
-                  <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${startDayTime}">
+                  <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${startDayTime}" ${isDisabled ? 'disabled' : ''}>
                   &mdash;
                   <label class="visually-hidden" for="event-end-time-1">To</label>
-                  <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${endDayTime}">
+                  <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${endDayTime}" ${isDisabled ? 'disabled' : ''}>
                 </div>
 
                 <div class="event__field-group  event__field-group--price">
@@ -136,17 +148,20 @@ function createEventEditElement(state, destinationList, offersList) {
                     <span class="visually-hidden">Price</span>
                     &euro;
                   </label>
-                  <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
+                  <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}" ${isDisabled ? 'disabled' : ''}>
                 </div>
 
-                <button class="event__save-btn  btn  btn--blue" type="submit" ${isValidForm ? '' : 'disabled'}>Save</button>
-                <button class="event__reset-btn" type="reset">Delete</button>
-                <button class="event__rollup-btn" type="button">
-                  <span class="visually-hidden">Open event</span>
-                </button>
+                <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled || isSubmitDisabled ? '' : 'disabled'}>${isSaving ? 'Saving...' : 'Save'}</button>
+                ${isNewEvent ? `
+                  <button class="event__reset-btn" type="reset">Cancel</button>` : `
+                  <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${isDeleting ? 'Deleting...' : 'Delete'}</button>
+                  <button class="event__rollup-btn" type="button" ${isDisabled ? 'disabled' : ''}>
+                    <span class="visually-hidden">Open event</span>
+                  </button>
+                `}
               </header>
               <section class="event__details">
-                ${createOffersTemplate(currentOffers, checkedOffers)}
+                ${createOffersTemplate(currentOffers, checkedOffers, isDisabled)}
                 ${createDestinationTemplate(currentDestination)}
               </section>
             </form>
@@ -161,24 +176,30 @@ export default class EventEdit extends AbstractStatefulView {
   #handleDeleteClick = null;
   #dateFromPicker = null;
   #dateToPicker = null;
-  #isValidForm = false;
+  #isNewEvent = false;
 
-  constructor({event = DEFAULT_EVENT, destinationList, offersList, onSubmitClick, onCancelClick, onDeleteClick}) {
+  constructor({
+    event = DEFAULT_EVENT,
+    destinationList,
+    offersList, onSubmitClick,
+    onCancelClick,
+    onDeleteClick,
+    isNewEvent = false
+  }) {
     super();
     this.#destinationList = destinationList.destinations;
     this.#offersList = offersList.offers;
     this.#handleSubmitClick = onSubmitClick;
     this.#handleCancelClick = onCancelClick;
     this.#handleDeleteClick = onDeleteClick;
+    this.#isNewEvent = isNewEvent;
 
-    this.#isValidForm = !!event.destination;
-
-    this._setState({...EventEdit.parseEventToState(event), isValidForm: this.#isValidForm});
+    this._setState({...EventEdit.parseEventToState(event)});
     this._restoreHandlers();
   }
 
   get template() {
-    return createEventEditElement(this._state, this.#destinationList, this.#offersList);
+    return createEventEditElement(this._state, this.#destinationList, this.#offersList, this.#isNewEvent, this.#isValidForm());
   }
 
   removeElement() {
@@ -202,26 +223,19 @@ export default class EventEdit extends AbstractStatefulView {
   }
 
   _restoreHandlers() {
-    this.element.querySelector('.event__save-btn').addEventListener('click', this.#clickSubmitHandler);
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#clickDeleteHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickCancelHandler);
-    this.element.querySelector('.event__type-group').addEventListener('change', this.#changeTypeHandler);
-    this.element.querySelector('.event__input--destination').addEventListener('change', this.#changeDestinationHandler);
-    this.element.querySelector('.event__input--price').addEventListener('change', this.#changePriceHandler);
-
-    if(this._state.event?.offers) {
-      this.element.querySelector('.event__available-offers').addEventListener('change', this.#changeOfferHandler);
-    }
+    this.element.querySelector('.event__save-btn')?.addEventListener('click', this.#clickSubmitHandler);
+    this.element.querySelector('.event__reset-btn')?.addEventListener('click', this.#clickDeleteHandler);
+    this.element.querySelector('.event__rollup-btn')?.addEventListener('click', this.#clickCancelHandler);
+    this.element.querySelector('.event__type-group')?.addEventListener('change', this.#changeTypeHandler);
+    this.element.querySelector('.event__input--destination')?.addEventListener('change', this.#changeDestinationHandler);
+    this.element.querySelector('.event__input--price')?.addEventListener('change', this.#changePriceHandler);
+    this.element.querySelector('.event__available-offers')?.addEventListener('change', this.#changeOfferHandler);
 
     this.#setDatepicker();
   }
 
   #clickSubmitHandler = (evt) => {
     evt.preventDefault();
-
-    if(!this.#isValidForm) {
-      return;
-    }
 
     this.#handleSubmitClick(EventEdit.parseStateToEvent(this._state));
   };
@@ -246,19 +260,17 @@ export default class EventEdit extends AbstractStatefulView {
   #changeDestinationHandler = (evt) => {
     const newDestination = this.#destinationList.find((destinationItem) => destinationItem.name === evt.target.value);
     const newDestinationId = newDestination ? newDestination.id : '';
-    this.#isValidForm = !!newDestinationId;
 
     this.updateElement({
       ...this._state,
       destination: newDestinationId,
-      isValidForm: this.#isValidForm,
     });
   };
 
   #dateFromChangeHandler = ([userDate]) => {
     userDate = userDate || this._state.dateFrom;
 
-    this._setState({
+    this.updateElement({
       ...this._state,
       dateFrom: userDate,
     });
@@ -269,7 +281,7 @@ export default class EventEdit extends AbstractStatefulView {
   #dateToChangeHandler = ([userDate]) => {
     userDate = userDate || this._state.dateTo;
 
-    this._setState({
+    this.updateElement({
       ...this._state,
       dateTo: userDate,
     });
@@ -278,11 +290,11 @@ export default class EventEdit extends AbstractStatefulView {
   };
 
   #changePriceHandler = (evt) => {
-    const basePrice = Number(evt.target.value) || 0;
+    const basePrice = evt.target.value;
 
-    this._setState({
+    this.updateElement({
       ...this._state,
-      basePrice: String(basePrice)
+      basePrice: Number(basePrice)
     });
   };
 
@@ -328,11 +340,30 @@ export default class EventEdit extends AbstractStatefulView {
     );
   }
 
+  #isValidForm() {
+    const isValidDestination = !!this._state.destination;
+    const isValidDateFrom = !!this._state.dateFrom;
+    const isValidDateTo = !!this._state.dateTo;
+    const isValidPrice = this._state.basePrice > 0;
+
+    return isValidDestination && isValidDateFrom && isValidDateTo && isValidPrice;
+  }
+
   static parseEventToState(event) {
-    return {...event};
+    return {...event,
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false,
+    };
   }
 
   static parseStateToEvent(state) {
-    return {...state};
+    const event = {...state};
+
+    delete event.isDisabled;
+    delete event.isSaving;
+    delete event.isDeleting;
+
+    return event;
   }
 }

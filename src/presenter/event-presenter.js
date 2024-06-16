@@ -62,11 +62,47 @@ export default class EventPresenter {
     }
 
     if (this.#mode === Mode.EDITING) {
-      replace(this.#eventEdit, prevEventEdit);
+      replace(this.#eventPoint, prevEventEdit);
+      this.#mode = Mode.DEFAULT;
     }
 
     remove(prevEventPoint);
     remove(prevEventEdit);
+  }
+
+  setSaving() {
+    if (this.#mode === Mode.EDITING) {
+      this.#eventEdit.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#eventEdit.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  }
+
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#eventPoint.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#eventEdit.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#eventEdit.shake(resetFormState);
   }
 
   destroy() {
@@ -108,7 +144,6 @@ export default class EventPresenter {
       isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       update,
     );
-    this.#toggleView();
   };
 
   #onCancelClick = () => {
