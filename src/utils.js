@@ -19,12 +19,13 @@ const getEventDuration = (dateFrom, dateTo) => {
   const durationHours = dayjs(dateTo).diff(dateFrom, 'h') % NUMBER_HOURS_IN_DAY;
   const durationMinutes = dayjs(dateTo).diff(dateFrom, 'm') % NUMBER_MINUTES_IN_HOUR;
 
-  let duration = '';
-  duration += durationDays ? `${durationDays}D ` : '';
-  duration += durationHours ? `${durationHours}H ` : '';
-  duration += `${durationMinutes}M`;
-
-  return duration;
+  if (durationDays > 0) {
+    return `${durationDays.toString().padStart(2, '0')}D ${durationHours.toString().padStart(2, '0')}H ${durationMinutes.toString().padStart(2, '0')}M`;
+  } else if (durationHours > 0) {
+    return `${durationHours.toString().padStart(2, '0')}H ${durationMinutes.toString().padStart(2, '0')}M`;
+  } else {
+    return `${durationMinutes}M`;
+  }
 };
 
 const getRandomArrayElement = (items) => items[Math.floor(Math.random() * items.length)];
@@ -61,10 +62,6 @@ const getEventFilterCount = (events, filterType) => {
   }
 };
 
-const getDefaultDateFrom = () => new Date(CURRENT_DATE);
-
-const getDefaultDateTo = () => new Date(CURRENT_DATE.add(1, 'day'));
-
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
 const isDatesEqual = (dateA, dateB) => (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB, 'D');
@@ -83,8 +80,6 @@ export {
   sortDay,
   sortTime,
   sortPrice,
-  getDefaultDateFrom,
-  getDefaultDateTo,
   isEscapeKey,
   isDatesEqual
 };

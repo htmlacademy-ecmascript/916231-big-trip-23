@@ -18,11 +18,13 @@ export default class EventsModel extends Observable {
     try {
       const events = await this.#eventsApiService.events;
       this.#events = events.map(this.#adaptToClient);
+      this._notify(UpdateType.INIT, false);
     } catch(err) {
       this.#events = [];
+      this._notify(UpdateType.INIT, true);
     }
 
-    this._notify(UpdateType.INIT);
+
   }
 
   async updateEvent(updateType, update) {
@@ -53,7 +55,7 @@ export default class EventsModel extends Observable {
       const response = await this.#eventsApiService.addEvent(update);
       const newEvent = this.#adaptToClient(response);
 
-      this.#events = [update, ...this.#events];
+      this.#events = [newEvent, ...this.#events];
 
       this._notify(updateType, newEvent);
     } catch(err) {

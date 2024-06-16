@@ -1,4 +1,4 @@
-import {render, } from '../framework/render.js';
+import {render, replace, remove} from '../framework/render.js';
 import Filters from '../view/filters.js';
 import {FilterTypes, UpdateType} from '../const.js';
 import {getEventFilterCount} from '../utils.js';
@@ -31,7 +31,7 @@ export default class FilterPresenter {
 
   init() {
     const filters = this.filters;
-    const currentFilter = this.#currentFilter;
+    const currentFilter = this.#filterModel.filter;
     const prevFilterComponent = this.#filterComponent;
 
     this.#filterComponent = new Filters({
@@ -42,8 +42,11 @@ export default class FilterPresenter {
 
     if (prevFilterComponent === null) {
       render(this.#filterComponent, this.#filterContainer);
-
+      return;
     }
+
+    replace(this.#filterComponent, prevFilterComponent);
+    remove(prevFilterComponent);
   }
 
   #handleModelEvent = () => {
