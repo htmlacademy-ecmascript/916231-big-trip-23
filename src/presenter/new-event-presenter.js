@@ -1,6 +1,7 @@
 import {remove, render, RenderPosition} from '../framework/render.js';
 import EventEdit from '../view/event-edit.js';
 import {UserAction, UpdateType} from '../const.js';
+import {isEscapeKey} from '../utils.js';
 
 export default class NewEventPresenter {
   #eventListContainer = null;
@@ -85,7 +86,7 @@ export default class NewEventPresenter {
   };
 
   #escKeyDownHandler = (evt) => {
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
+    if(isEscapeKey(evt)) {
       evt.preventDefault();
       this.destroy();
     }

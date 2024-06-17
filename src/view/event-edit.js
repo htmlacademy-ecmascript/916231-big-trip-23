@@ -1,5 +1,5 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import {convertToDateTime} from '../utils.js';
+import {convertToDateTime, isDatesEqual} from '../utils.js';
 import {EVENT_TYPES, DEFAULT_EVENT} from '../const.js';
 import flatpickr from 'flatpickr';
 
@@ -227,7 +227,7 @@ export default class EventEdit extends AbstractStatefulView {
     this.element.querySelector('.event__reset-btn')?.addEventListener('click', this.#clickDeleteHandler);
     this.element.querySelector('.event__rollup-btn')?.addEventListener('click', this.#clickCancelHandler);
     this.element.querySelector('.event__type-group')?.addEventListener('change', this.#changeTypeHandler);
-    this.element.querySelector('.event__input--destination')?.addEventListener('change', this.#changeDestinationHandler);
+    this.element.querySelector('.event__input--destination')?.addEventListener('input', this.#changeDestinationHandler);
     this.element.querySelector('.event__input--price')?.addEventListener('change', this.#changePriceHandler);
     this.element.querySelector('.event__available-offers')?.addEventListener('change', this.#changeOfferHandler);
 
@@ -238,9 +238,10 @@ export default class EventEdit extends AbstractStatefulView {
     const isValidDestination = !!this._state.destination;
     const isValidDateFrom = !!this._state.dateFrom;
     const isValidDateTo = !!this._state.dateTo;
+    const isValidDate = !isDatesEqual(this._state.dateFrom, this._state.dateTo);
     const isValidPrice = this._state.basePrice > 0;
 
-    return isValidDestination && isValidDateFrom && isValidDateTo && isValidPrice;
+    return isValidDestination && isValidDateFrom && isValidDateTo && isValidDate && isValidPrice;
   }
 
   #clickSubmitHandler = (evt) => {
