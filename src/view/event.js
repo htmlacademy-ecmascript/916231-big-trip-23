@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import {convertToDayOfMonth, convertToHourMinute, getEventDuration} from '../utils.js';
+import {convertToMonthDay, convertToHourMinute, getEventDuration} from '../utils.js';
 import {EVENT_TYPES} from '../const.js';
 import he from 'he';
 
@@ -13,7 +13,7 @@ function createEventElement(event, destinationList, offersList) {
   const typeOffers = offersList.find((offer) => offer.type === event.type);
   const currentOffers = typeOffers ? typeOffers.offers.filter((offer) => event.offers.includes(offer.id)) : null;
 
-  const startTimeDayOfMonth = convertToDayOfMonth(dateFrom);
+  const startTimeDayOfMonth = convertToMonthDay(dateFrom);
   const startTimeHourMinute = convertToHourMinute(dateFrom);
   const endTimeHourMinute = convertToHourMinute(dateTo);
 

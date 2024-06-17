@@ -1,20 +1,26 @@
 import dayjs from 'dayjs';
 import { FilterTypes } from './const.js';
 
-const DAY_MONTH_FORMAT = 'MMM D';
+const MONTH_DAY_FORMAT = 'MMM D';
 const HOUR_MINUTE_FORMAT = 'HH:mm';
 const DATE_TIME_FORMAT = 'DD/MM/YY HH:mm';
+const DAY_FORMAT = 'D';
+const MONTH_FORMAT = 'MMM';
 const COUNT_DESTINATION_ROUTE = 3;
 const FORMAT_SYMBOL_COUNT = 2;
 const NUMBER_HOURS_IN_DAY = 24;
 const NUMBER_MINUTES_IN_HOUR = 60;
 const CURRENT_DATE = dayjs();
 
-const convertToDayOfMonth = (date) => date ? dayjs(date).format(DAY_MONTH_FORMAT) : '';
+const convertToMonthDay = (date) => date ? dayjs(date).format(MONTH_DAY_FORMAT) : '';
 
 const convertToHourMinute = (date) => date ? dayjs(date).format(HOUR_MINUTE_FORMAT) : '';
 
 const convertToDateTime = (date) => date ? dayjs(date).format(DATE_TIME_FORMAT) : '';
+
+const convertToDay = (date) => date ? dayjs(date).format(DAY_FORMAT) : '';
+
+const convertToMonth = (date) => date ? dayjs(date).format(MONTH_FORMAT) : '';
 
 const getEventDuration = (dateFrom, dateTo) => {
   const durationDays = dayjs(dateTo).diff(dateFrom, 'd');
@@ -37,7 +43,9 @@ const getRandomArrayElement = (items) => items[Math.floor(Math.random() * items.
 
 const getRandomInteger = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 
-const sortDay = (eventA, eventB) => dayjs(eventA.dateFrom).diff(dayjs(eventB.dateFrom));
+const sortDayFrom = (eventA, eventB) => dayjs(eventA.dateFrom).diff(dayjs(eventB.dateFrom));
+
+const sortDayTo = (eventA, eventB) => dayjs(eventB.dateTo).diff(dayjs(eventA.dateTo));
 
 const sortTime = (eventA, eventB) => {
   const diffA = dayjs(eventA.dateTo).diff(dayjs(eventA.dateFrom));
@@ -108,8 +116,26 @@ const getRoute = (events, destinations) => {
   }
 };
 
+const getDurationRoute = (events) => {
+  const eventList = [...events];
+
+  const sortEventFrom = [...eventList.sort(sortDayFrom)];
+  const sortEventTo = [...eventList.sort(sortDayTo)];
+
+  const startDay = convertToDay(sortEventFrom[0].dateFrom);
+  const startMonth = convertToMonth(sortEventFrom[0].dateFrom);
+  const endDay = convertToDay(sortEventTo[sortDayTo.length - 1].dateTo);
+  const endMonth = convertToMonth(sortEventTo[sortDayTo.length - 1].dateTo);
+
+  if(startMonth === endMonth) {
+    return `${startDay}&nbsp;&mdash;&nbsp;${endDay} ${endMonth}`;
+  } else {
+    return `${startDay} ${startMonth}&nbsp;&mdash;&nbsp;${endDay} ${endMonth}`;
+  }
+};
+
 export {
-  convertToDayOfMonth,
+  convertToMonthDay,
   convertToHourMinute,
   filterFuture,
   filterPresent,
@@ -119,11 +145,13 @@ export {
   getEventDuration,
   getRandomArrayElement,
   getRandomInteger,
-  sortDay,
+  sortDayFrom,
+  sortDayTo,
   sortTime,
   sortPrice,
   isEscapeKey,
   isDatesEqual,
   getTotalPrice,
-  getRoute
+  getRoute,
+  getDurationRoute
 };

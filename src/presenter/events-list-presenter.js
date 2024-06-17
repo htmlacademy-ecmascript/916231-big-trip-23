@@ -8,7 +8,7 @@ import EventPresenter from './event-presenter.js';
 import NewEventPresenter from './new-event-presenter.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import {render, remove, RenderPosition} from '../framework/render.js';
-import {sortDay, sortTime, sortPrice, filterFuture, filterPresent, filterPast} from '../utils.js';
+import {sortDayFrom, sortTime, sortPrice, filterFuture, filterPresent, filterPast} from '../utils.js';
 import {FilterTypes, SortTypes, UpdateType, UserAction, TimeLimit} from '../const.js';
 
 const tripMainElement = document.querySelector('.trip-main');
@@ -103,7 +103,7 @@ export default class EventsListPresenter {
 
     switch (this.#currentSortType) {
       case SortTypes.DAY:
-        return filteredEvents.sort(sortDay);
+        return filteredEvents.sort(sortDayFrom);
       case SortTypes.TIME:
         return filteredEvents.sort(sortTime);
       case SortTypes.PRICE:
