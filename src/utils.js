@@ -4,6 +4,8 @@ import { FilterTypes } from './const.js';
 const DAY_MONTH_FORMAT = 'MMM D';
 const HOUR_MINUTE_FORMAT = 'HH:mm';
 const DATE_TIME_FORMAT = 'DD/MM/YY HH:mm';
+const COUNT_DESTINATION_ROUTE = 3;
+const FORMAT_SYMBOL_COUNT = 2;
 const NUMBER_HOURS_IN_DAY = 24;
 const NUMBER_MINUTES_IN_HOUR = 60;
 const CURRENT_DATE = dayjs();
@@ -20,9 +22,12 @@ const getEventDuration = (dateFrom, dateTo) => {
   const durationMinutes = dayjs(dateTo).diff(dateFrom, 'm') % NUMBER_MINUTES_IN_HOUR;
 
   if (durationDays > 0) {
-    return `${durationDays.toString().padStart(2, '0')}D ${durationHours.toString().padStart(2, '0')}H ${durationMinutes.toString().padStart(2, '0')}M`;
+    return `${durationDays.toString().padStart(FORMAT_SYMBOL_COUNT, '0')}D
+            ${durationHours.toString().padStart(FORMAT_SYMBOL_COUNT, '0')}H
+            ${durationMinutes.toString().padStart(FORMAT_SYMBOL_COUNT, '0')}M`;
   } else if (durationHours > 0) {
-    return `${durationHours.toString().padStart(2, '0')}H ${durationMinutes.toString().padStart(2, '0')}M`;
+    return `${durationHours.toString().padStart(FORMAT_SYMBOL_COUNT, '0')}H
+            ${durationMinutes.toString().padStart(FORMAT_SYMBOL_COUNT, '0')}M`;
   } else {
     return `${durationMinutes}M`;
   }
@@ -66,6 +71,43 @@ const isEscapeKey = (evt) => evt.key === 'Escape';
 
 const isDatesEqual = (dateA, dateB) => (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB, 'D');
 
+const getTotalPrice = (events, offers) => {
+  let totalPrice = events.reduce((sum, event) => sum + event.basePrice, 0);
+
+  events.map((event) => {
+    const currentOffers = offers.find((offer) => offer.type === event.type).offers;
+    currentOffers.map((offer) => {
+      if (event.offers.includes(offer.id)){
+        totalPrice += offer.price;
+      }
+    });
+  });
+
+  return totalPrice;
+};
+
+const getRoute = (events, destinations) => {
+  const currentIdDestinations = [];
+  events.map((event) => currentIdDestinations.push(event.destination));
+
+  const currentDestinations = destinations.filter((destination) => currentIdDestinations.includes(destination.id));
+
+  if(currentDestinations.length > COUNT_DESTINATION_ROUTE) {
+    return `${currentDestinations[0].name } &mdash; ... &mdash; ${ currentDestinations[currentDestinations.length - 1].name}`;
+  } else {
+    let resultRoute = '';
+
+    currentDestinations.map((destination) => {
+      resultRoute += `${destination.name } &mdash; `;
+    });
+
+    const lastSeparator = resultRoute.lastIndexOf(' &mdash; ');
+    resultRoute = resultRoute.substring(0, lastSeparator);
+
+    return resultRoute;
+  }
+};
+
 export {
   convertToDayOfMonth,
   convertToHourMinute,
@@ -81,5 +123,7 @@ export {
   sortTime,
   sortPrice,
   isEscapeKey,
-  isDatesEqual
+  isDatesEqual,
+  getTotalPrice,
+  getRoute
 };

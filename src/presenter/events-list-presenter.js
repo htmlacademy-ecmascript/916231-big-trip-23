@@ -2,26 +2,30 @@ import Sorting from '../view/sorting.js';
 import EventsList from '../view/events-list.js';
 import NoEvent from '../view/no-event.js';
 import Loading from '../view/loading.js';
+import TripInfo from '../view/trip-info.js';
 import ErrorMessage from '../view/error-message.js';
 import EventPresenter from './event-presenter.js';
 import NewEventPresenter from './new-event-presenter.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
-import {render, remove} from '../framework/render.js';
+import {render, remove, RenderPosition} from '../framework/render.js';
 import {sortDay, sortTime, sortPrice, filterFuture, filterPresent, filterPast} from '../utils.js';
 import {FilterTypes, SortTypes, UpdateType, UserAction, TimeLimit} from '../const.js';
 
+const tripMainElement = document.querySelector('.trip-main');
 const siteMainElement = document.querySelector('.page-main');
 const tripEventsElement = siteMainElement.querySelector('.trip-events');
 
 export default class EventsListPresenter {
-  #eventsListComponent = new EventsList();
-
   #eventsListContainer = null;
+
   #eventsModel = null;
   #destinationsModel = null;
-  #offersList = null;
+  #offersModel = null;
   #filterModel = null;
+
+  #eventsListComponent = new EventsList();
   #sortComponent = null;
+  #tripInfoComponent = null;
   #noEventComponent = null;
   #loadingComponent = new Loading();
   #errorMessageComponent = new ErrorMessage();
@@ -44,7 +48,7 @@ export default class EventsListPresenter {
     this.#eventsListContainer = eventsListContainer;
     this.#eventsModel = eventsModel;
     this.#destinationsModel = destinationsModel;
-    this.#offersList = offersModel;
+    this.#offersModel = offersModel;
     this.#filterModel = filterModel;
 
     this.#eventsModel.addObserver(this.#handleModelEvent);
@@ -54,7 +58,7 @@ export default class EventsListPresenter {
       eventListContainer: this.#eventsListComponent.element,
       event: this.#eventsModel.events,
       destinationList: this.#destinationsModel,
-      offersList: this.#offersList,
+      offersList: this.#offersModel,
       onSubmitClick: this.#handleViewAction,
       onDestroy: onNewEventDestroy
     });
@@ -146,6 +150,8 @@ export default class EventsListPresenter {
     switch (updateType) {
       case UpdateType.PATCH:
         this.#eventPresenters.get(data.id).init(data);
+        remove(this.#tripInfoComponent);
+        this.#renderTripInfo();
         break;
       case UpdateType.MINOR:
         this.#clearEventList();
@@ -182,6 +188,16 @@ export default class EventsListPresenter {
     render(this.#sortComponent, tripEventsElement);
   }
 
+  #renderTripInfo() {
+    const events = this.#eventsModel.events;
+    const offers = this.#offersModel.offers;
+    const destinations = this.#destinationsModel.destinations;
+
+    this.#tripInfoComponent = new TripInfo({events, offers, destinations});
+
+    render(this.#tripInfoComponent, tripMainElement, RenderPosition.AFTERBEGIN);
+  }
+
   #renderEventsList() {
     const eventList = this.events;
 
@@ -204,6 +220,8 @@ export default class EventsListPresenter {
     remove(this.#errorMessageComponent);
 
     this.#renderSorting();
+    this.#renderTripInfo();
+
     render(this.#eventsListComponent, this.#eventsListContainer);
 
     for (let i = 0; i < eventList.length; i++) {
@@ -215,7 +233,7 @@ export default class EventsListPresenter {
     const eventPresenter = new EventPresenter({
       eventsListContainer: this.#eventsListComponent,
       destinationsModel: this.#destinationsModel,
-      offersModel: this.#offersList,
+      offersModel: this.#offersModel,
       onDataChange: this.#handleViewAction,
       onModeChange: this.#handleModeChange
     });
@@ -250,6 +268,7 @@ export default class EventsListPresenter {
     }
 
     remove(this.#sortComponent);
+    remove(this.#tripInfoComponent);
     remove(this.#noEventComponent);
     remove(this.#loadingComponent);
   }

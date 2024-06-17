@@ -23,8 +23,6 @@ export default class EventsModel extends Observable {
       this.#events = [];
       this._notify(UpdateType.INIT, true);
     }
-
-
   }
 
   async updateEvent(updateType, update) {

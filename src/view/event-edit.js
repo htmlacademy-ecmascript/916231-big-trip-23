@@ -234,6 +234,15 @@ export default class EventEdit extends AbstractStatefulView {
     this.#setDatepicker();
   }
 
+  #isValidForm() {
+    const isValidDestination = !!this._state.destination;
+    const isValidDateFrom = !!this._state.dateFrom;
+    const isValidDateTo = !!this._state.dateTo;
+    const isValidPrice = this._state.basePrice > 0;
+
+    return isValidDestination && isValidDateFrom && isValidDateTo && isValidPrice;
+  }
+
   #clickSubmitHandler = (evt) => {
     evt.preventDefault();
 
@@ -338,15 +347,6 @@ export default class EventEdit extends AbstractStatefulView {
         onChange: this.#dateToChangeHandler,
       },
     );
-  }
-
-  #isValidForm() {
-    const isValidDestination = !!this._state.destination;
-    const isValidDateFrom = !!this._state.dateFrom;
-    const isValidDateTo = !!this._state.dateTo;
-    const isValidPrice = this._state.basePrice > 0;
-
-    return isValidDestination && isValidDateFrom && isValidDateTo && isValidPrice;
   }
 
   static parseEventToState(event) {
