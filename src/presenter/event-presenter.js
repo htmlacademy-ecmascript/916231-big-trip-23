@@ -138,7 +138,8 @@ export default class EventPresenter {
   };
 
   #onSubmitClick = (update) => {
-    const isMinorUpdate = !isDatesEqual(this.#event.dateFrom, update.dateFrom);
+    const isMinorUpdate = !isDatesEqual(this.#event.dateFrom, update.dateFrom) && !isDatesEqual(this.#event.dateTo, update.dateTo);
+
     this.#handleDataChange(
       UserAction.UPDATE_EVENT,
       isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,

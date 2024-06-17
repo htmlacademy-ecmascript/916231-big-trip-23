@@ -2,9 +2,9 @@ import AbstractView from '../framework/view/abstract-view.js';
 import {getTotalPrice, getRoute, getDurationRoute} from '../utils.js';
 
 function createTripInfoTemplate(events, offers, destinations) {
-  const totalPrice = getTotalPrice(events, offers);
   const route = getRoute(events, destinations);
   const duration = getDurationRoute(events);
+  const totalPrice = getTotalPrice(events, offers);
 
   return (`<section class="trip-main__trip-info  trip-info">
             <div class="trip-info__main">

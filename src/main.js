@@ -8,7 +8,7 @@ import NewEventButtonView from './view/new-event-button-view.js';
 import {render} from './framework/render.js';
 import EventsApiService from './events-api-service.js';
 
-const AUTHORIZATION = 'Basic fghhtgrfd9002';
+const AUTHORIZATION = 'Basic fghhtgrfd99';
 const END_POINT = 'https://23.objects.htmlacademy.pro/big-trip';
 
 const siteMainElement = document.querySelector('.page-main');
