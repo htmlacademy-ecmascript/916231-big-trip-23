@@ -64,21 +64,6 @@ export default class EventsListPresenter {
     });
   }
 
-  init() {
-    this.#renderEventsList();
-  }
-
-  createEvent() {
-    this.#currentSortType = SortTypes.DAY;
-    this.#currentFilterType = FilterTypes.EVERYTHING;
-
-    render(this.#eventsListComponent, this.#eventsListContainer);
-    remove(this.#noEventComponent);
-
-    this.#filterModel.setFilter(UpdateType.MAJOR, this.#currentFilterType);
-    this.#newEventPresenter.init();
-  }
-
   get events() {
     this.#currentFilterType = this.#filterModel.filter;
 
@@ -111,6 +96,21 @@ export default class EventsListPresenter {
     }
 
     return filteredEvents;
+  }
+
+  init() {
+    this.#renderEventsList();
+  }
+
+  createEvent() {
+    this.#currentSortType = SortTypes.DAY;
+    this.#currentFilterType = FilterTypes.EVERYTHING;
+
+    render(this.#eventsListComponent, this.#eventsListContainer);
+    remove(this.#noEventComponent);
+
+    this.#filterModel.setFilter(UpdateType.MAJOR, this.#currentFilterType);
+    this.#newEventPresenter.init();
   }
 
   #handleViewAction = async (actionType, updateType, update) => {
