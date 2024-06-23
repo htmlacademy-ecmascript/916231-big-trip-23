@@ -14,8 +14,8 @@ export default class EventPresenter {
   #event = null;
   #eventPoint = null;
   #eventEdit = null;
-  #destinationList = null;
-  #offersList = null;
+  #destinationsModel = null;
+  #offersModel = null;
   #handleDataChange = null;
   #handleModeChange = null;
 
@@ -23,8 +23,8 @@ export default class EventPresenter {
 
   constructor({eventsListContainer, destinationsModel, offersModel, onDataChange, onModeChange}) {
     this.#eventsListContainer = eventsListContainer;
-    this.#destinationList = destinationsModel;
-    this.#offersList = offersModel;
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
   }
@@ -37,16 +37,16 @@ export default class EventPresenter {
 
     this.#eventPoint = new Event({
       event: this.#event,
-      destinationList: this.#destinationList,
-      offersList: this.#offersList,
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersModel,
       onEditClick: this.#toggleEdit,
       onFavoriteClick: this.#handleFavoriteClick,
     });
 
     this.#eventEdit = new EventEdit({
       event: this.#event,
-      destinationList: this.#destinationList,
-      offersList: this.#offersList,
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersModel,
       onSubmitClick: this.#onSubmitClick,
       onCancelClick: this.#onCancelClick,
       onDeleteClick: this.#onDeleteClick,
@@ -116,7 +116,7 @@ export default class EventPresenter {
     }
   }
 
-  #onEscKeydown = (evt) => {
+  #documentKeydownHandler = (evt) => {
     if (isEscapeKey(evt)) {
       evt.preventDefault();
       this.#eventEdit.reset(this.#event);
@@ -126,14 +126,14 @@ export default class EventPresenter {
 
   #toggleEdit = () => {
     replace(this.#eventEdit, this.#eventPoint);
-    document.addEventListener('keydown', this.#onEscKeydown);
+    document.addEventListener('keydown', this.#documentKeydownHandler);
     this.#handleModeChange();
     this.#mode = Mode.EDITING;
   };
 
   #toggleView = () => {
     replace(this.#eventPoint, this.#eventEdit);
-    document.removeEventListener('keydown', this.#onEscKeydown);
+    document.removeEventListener('keydown', this.#documentKeydownHandler);
     this.#mode = Mode.DEFAULT;
   };
 

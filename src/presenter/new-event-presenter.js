@@ -6,18 +6,18 @@ import {isEscapeKey} from '../utils.js';
 export default class NewEventPresenter {
   #eventListContainer = null;
   #event = null;
-  #destinationList = null;
-  #offersList = null;
+  #destinationsModel = null;
+  #offersModel = null;
   #onSubmitClick = null;
   #onDestroy = null;
 
   #eventEditComponent = null;
 
-  constructor({eventListContainer, event, destinationList, offersList, onSubmitClick, onDestroy}) {
+  constructor({eventListContainer, event, destinationsModel, offersModel, onSubmitClick, onDestroy}) {
     this.#eventListContainer = eventListContainer;
     this.#event = event;
-    this.#destinationList = destinationList;
-    this.#offersList = offersList;
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
     this.#onSubmitClick = onSubmitClick;
     this.#onDestroy = onDestroy;
   }
@@ -28,8 +28,8 @@ export default class NewEventPresenter {
     }
 
     this.#eventEditComponent = new EventEdit({
-      destinationList: this.#destinationList,
-      offersList: this.#offersList,
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersModel,
       onSubmitClick: this.#handleFormSubmit,
       onCancelClick: this.#handleDeleteClick,
       onDeleteClick: this.#handleDeleteClick,
@@ -38,7 +38,7 @@ export default class NewEventPresenter {
 
     render(this.#eventEditComponent, this.#eventListContainer, RenderPosition.AFTERBEGIN);
 
-    document.addEventListener('keydown', this.#escKeyDownHandler);
+    document.addEventListener('keydown', this.#documentKeydownHandler);
   }
 
   destroy() {
@@ -51,7 +51,7 @@ export default class NewEventPresenter {
     remove(this.#eventEditComponent);
     this.#eventEditComponent = null;
 
-    document.removeEventListener('keydown', this.#escKeyDownHandler);
+    document.removeEventListener('keydown', this.#documentKeydownHandler);
   }
 
   setSaving() {
@@ -85,7 +85,7 @@ export default class NewEventPresenter {
     this.destroy();
   };
 
-  #escKeyDownHandler = (evt) => {
+  #documentKeydownHandler = (evt) => {
     if(isEscapeKey(evt)) {
       evt.preventDefault();
       this.destroy();

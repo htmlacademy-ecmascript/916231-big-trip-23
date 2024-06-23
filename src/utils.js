@@ -117,10 +117,8 @@ const getRoute = (events, destinations) => {
 };
 
 const getDurationRoute = (events) => {
-  const eventList = [...events];
-
-  const sortEventFrom = [...eventList.sort(sortDayFrom)];
-  const sortEventTo = [...eventList.sort(sortDayTo)];
+  const sortEventFrom = [...events].sort(sortDayFrom);
+  const sortEventTo = [...events].sort(sortDayTo);
 
   const startDay = convertToDay(sortEventFrom[0].dateFrom);
   const startMonth = convertToMonth(sortEventFrom[0].dateFrom);

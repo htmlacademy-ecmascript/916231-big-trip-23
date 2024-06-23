@@ -57,8 +57,8 @@ export default class EventsListPresenter {
     this.#newEventPresenter = new NewEventPresenter({
       eventListContainer: this.#eventsListComponent.element,
       event: this.#eventsModel.events,
-      destinationList: this.#destinationsModel,
-      offersList: this.#offersModel,
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersModel,
       onSubmitClick: this.#handleViewAction,
       onDestroy: onNewEventDestroy
     });
@@ -199,7 +199,7 @@ export default class EventsListPresenter {
   }
 
   #renderEventsList() {
-    const eventList = this.events;
+    const events = this.events;
 
     if (this.#isLoading) {
       this.#renderLoading();
@@ -211,7 +211,7 @@ export default class EventsListPresenter {
       return;
     }
 
-    if(eventList.length === 0) {
+    if(events.length === 0) {
       this.#renderNoEvent();
       remove(this.#sortComponent);
       return;
@@ -224,9 +224,7 @@ export default class EventsListPresenter {
 
     render(this.#eventsListComponent, this.#eventsListContainer);
 
-    for (let i = 0; i < eventList.length; i++) {
-      this.#renderEvent(eventList[i]);
-    }
+    events.forEach((event) => this.#renderEvent(event));
   }
 
   #renderEvent(event) {
