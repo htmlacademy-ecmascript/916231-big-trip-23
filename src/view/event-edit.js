@@ -54,7 +54,7 @@ function createOffersTemplate(currentOffers, checkedOffers, isDisabled) {
     </section>` : ''}`;
 }
 
-function createEventEditElement(state, destinationList, offersList, isNewEvent, isSubmitDisabled) {
+function createEventEditElement(state, allDestinations, allOffers, isNewEvent, isSubmitDisabled) {
   const {
     basePrice,
     dateFrom,
@@ -70,9 +70,9 @@ function createEventEditElement(state, destinationList, offersList, isNewEvent, 
   const price = basePrice || 0;
   const currentType = type;
 
-  const currentDestination = destinationList.find((destinationItem) => destinationItem.id === destination);
+  const currentDestination = allDestinations.find((destinationItem) => destinationItem.id === destination);
 
-  const typeOffers = offersList.find((offer) => offer.type === type);
+  const typeOffers = allOffers.find((offer) => offer.type === type);
   const currentOffers = typeOffers ? typeOffers.offers : [];
   const checkedOffers = offers;
 
@@ -127,9 +127,9 @@ function createEventEditElement(state, destinationList, offersList, isNewEvent, 
                     list="destination-list-1"
                     ${isDisabled ? 'disabled' : ''}
                   >
-                  ${destinationList ? `
+                  ${allDestinations ? `
                   <datalist id="destination-list-1">
-                    ${destinationList.map((eventDestination) => (`
+                    ${allDestinations.map((eventDestination) => (`
                     <option value="${eventDestination.name}"></option>
                     `)).join('')}
                   </datalist>` : ''}
@@ -169,8 +169,8 @@ function createEventEditElement(state, destinationList, offersList, isNewEvent, 
 }
 
 export default class EventEdit extends AbstractStatefulView {
-  #destinationList = null;
-  #offersList = null;
+  #destinations = null;
+  #offers = null;
   #handleSubmitClick = null;
   #handleCancelClick = null;
   #handleDeleteClick = null;
@@ -180,15 +180,16 @@ export default class EventEdit extends AbstractStatefulView {
 
   constructor({
     event = DEFAULT_EVENT,
-    destinationList,
-    offersList, onSubmitClick,
+    destinationsModel,
+    offersModel,
+    onSubmitClick,
     onCancelClick,
     onDeleteClick,
     isNewEvent = false
   }) {
     super();
-    this.#destinationList = destinationList.destinations;
-    this.#offersList = offersList.offers;
+    this.#destinations = destinationsModel.destinations;
+    this.#offers = offersModel.offers;
     this.#handleSubmitClick = onSubmitClick;
     this.#handleCancelClick = onCancelClick;
     this.#handleDeleteClick = onDeleteClick;
@@ -199,7 +200,7 @@ export default class EventEdit extends AbstractStatefulView {
   }
 
   get template() {
-    return createEventEditElement(this._state, this.#destinationList, this.#offersList, this.#isNewEvent, this.#isValidForm());
+    return createEventEditElement(this._state, this.#destinations, this.#offers, this.#isNewEvent, this.#isValidForm());
   }
 
   removeElement() {
@@ -223,13 +224,13 @@ export default class EventEdit extends AbstractStatefulView {
   }
 
   _restoreHandlers() {
-    this.element.querySelector('.event__save-btn')?.addEventListener('click', this.#clickSubmitHandler);
-    this.element.querySelector('.event__reset-btn')?.addEventListener('click', this.#clickDeleteHandler);
-    this.element.querySelector('.event__rollup-btn')?.addEventListener('click', this.#clickCancelHandler);
-    this.element.querySelector('.event__type-group')?.addEventListener('change', this.#changeTypeHandler);
-    this.element.querySelector('.event__input--destination')?.addEventListener('input', this.#changeDestinationHandler);
-    this.element.querySelector('.event__input--price')?.addEventListener('change', this.#changePriceHandler);
-    this.element.querySelector('.event__available-offers')?.addEventListener('change', this.#changeOfferHandler);
+    this.element.querySelector('.event__save-btn')?.addEventListener('click', this.#submitClickHandler);
+    this.element.querySelector('.event__reset-btn')?.addEventListener('click', this.#deleteClickHandler);
+    this.element.querySelector('.event__rollup-btn')?.addEventListener('click', this.#cancelClickHandler);
+    this.element.querySelector('.event__type-group')?.addEventListener('change', this.#typeChangeHandler);
+    this.element.querySelector('.event__input--destination')?.addEventListener('input', this.#destinationChangeHandler);
+    this.element.querySelector('.event__input--price')?.addEventListener('change', this.#priceChangeHandler);
+    this.element.querySelector('.event__available-offers')?.addEventListener('change', this.#offerChangeHandler);
 
     this.#setDatepicker();
   }
@@ -244,31 +245,31 @@ export default class EventEdit extends AbstractStatefulView {
     return isValidDestination && isValidDateFrom && isValidDateTo && isValidDate && isValidPrice;
   }
 
-  #clickSubmitHandler = (evt) => {
+  #submitClickHandler = (evt) => {
     evt.preventDefault();
 
     this.#handleSubmitClick(EventEdit.parseStateToEvent(this._state));
   };
 
-  #clickCancelHandler = (evt) => {
+  #cancelClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleCancelClick();
   };
 
-  #clickDeleteHandler = (evt) => {
+  #deleteClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleDeleteClick(EventEdit.parseStateToEvent(this._state));
   };
 
-  #changeTypeHandler = (evt) => {
+  #typeChangeHandler = (evt) => {
     this.updateElement({
       ...this._state,
       type: evt.target.value,
     });
   };
 
-  #changeDestinationHandler = (evt) => {
-    const newDestination = this.#destinationList.find((destinationItem) => destinationItem.name === evt.target.value);
+  #destinationChangeHandler = (evt) => {
+    const newDestination = this.#destinations.find((destinationItem) => destinationItem.name === evt.target.value);
     const newDestinationId = newDestination ? newDestination.id : '';
 
     this.updateElement({
@@ -299,7 +300,7 @@ export default class EventEdit extends AbstractStatefulView {
     this.#setDatepicker();
   };
 
-  #changePriceHandler = (evt) => {
+  #priceChangeHandler = (evt) => {
     const basePrice = evt.target.value;
 
     this.updateElement({
@@ -308,7 +309,7 @@ export default class EventEdit extends AbstractStatefulView {
     });
   };
 
-  #changeOfferHandler = (evt) => {
+  #offerChangeHandler = (evt) => {
     evt.preventDefault();
     const offerId = evt.target.dataset.offerId;
 

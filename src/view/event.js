@@ -3,14 +3,14 @@ import {convertToMonthDay, convertToHourMinute, getEventDuration} from '../utils
 import {EVENT_TYPES} from '../const.js';
 import he from 'he';
 
-function createEventElement(event, destinationList, offersList) {
-  const {basePrice, dateFrom, dateTo, isFavorite, type} = event;
+function createEventElement(event, destinations, offers) {
+  const {basePrice, destination, dateFrom, dateTo, isFavorite, type} = event;
 
   const currentType = type || EVENT_TYPES[0];
 
-  const currentDestination = destinationList.find((destinationItem) => destinationItem.id === event.destination);
+  const currentDestination = destinations.find((destinationItem) => destinationItem.id === destination);
 
-  const typeOffers = offersList.find((offer) => offer.type === event.type);
+  const typeOffers = offers.find((offer) => offer.type === event.type);
   const currentOffers = typeOffers ? typeOffers.offers.filter((offer) => event.offers.includes(offer.id)) : null;
 
   const startTimeDayOfMonth = convertToMonthDay(dateFrom);
@@ -67,28 +67,28 @@ function createEventElement(event, destinationList, offersList) {
 
 export default class Event extends AbstractView {
   #event = null;
-  #destinationList = null;
-  #offersList = null;
+  #destinations = null;
+  #offers = null;
   #handleClick = null;
   #handleFavoriteClick = null;
 
-  constructor({event, destinationList, offersList, onEditClick, onFavoriteClick}) {
+  constructor({event, destinationsModel, offersModel, onEditClick, onFavoriteClick}) {
     super();
     this.#event = event;
-    this.#destinationList = destinationList.destinations;
-    this.#offersList = offersList.offers;
+    this.#destinations = destinationsModel.destinations;
+    this.#offers = offersModel.offers;
     this.#handleClick = onEditClick;
     this.#handleFavoriteClick = onFavoriteClick;
 
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickRollupHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupClickHandler);
     this.element.querySelector('.event__favorite-btn').addEventListener('click', this.#favoriteClickHandler);
   }
 
   get template() {
-    return createEventElement(this.#event, this.#destinationList, this.#offersList);
+    return createEventElement(this.#event, this.#destinations, this.#offers);
   }
 
-  #clickRollupHandler = (evt) => {
+  #rollupClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleClick();
   };
